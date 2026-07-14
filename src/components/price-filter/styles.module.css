@@ -1,0 +1,33 @@
+.price-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.price-filter__legend {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.price-filter__inputs {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.price-filter__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.price-filter__label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+.price-filter__button {
+  width: 100%;
+}

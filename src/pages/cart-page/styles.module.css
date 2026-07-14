@@ -1,0 +1,38 @@
+.cart {
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cart__title {
+  margin-bottom: 3rem;
+  font-size: 1.875rem;
+  font-weight: bold;
+  line-height: 2rem;
+  text-align: center;
+}
+
+.cart__container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.cart__total {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5rem;
+}
+
+.cart__action {
+  padding: 1.5rem;
+}
+
+.cart__action-button {
+  width: 100%;
+}

@@ -1,0 +1,8 @@
+/* Lo único que sigue siendo global: las fundaciones. Todo lo demás vive en el
+   CSS Module del componente que lo usa. */
+@layer definitions, reset, global;
+
+@import "./colors.css" layer(definitions);
+@import "./typography.css" layer(definitions);
+@import "./reset.css" layer(reset);
+@import "./global.css" layer(global);

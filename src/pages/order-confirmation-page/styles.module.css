@@ -1,0 +1,51 @@
+.order-confirmation {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.order-confirmation__title {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: var(--accent-foreground);
+  font-weight: 500;
+}
+
+.order-confirmation__heading {
+  margin-bottom: 0.5rem;
+  font-size: 2.25rem;
+  line-height: 2.25rem;
+  font-weight: bold;
+}
+
+.order-confirmation__description {
+  margin-bottom: 3rem;
+  color: var(--muted-foreground);
+}
+
+.order-confirmation__tracking-label {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+.order-confirmation__tracking-code {
+  color: var(--accent-foreground);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+@media (min-width: 40rem) {
+  .order-confirmation {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .order-confirmation {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}

@@ -1,0 +1,73 @@
+import { Prose, Section } from "../../components/ui";
+import { useDocumentTitle } from "../../hooks";
+
+export default function AboutPage() {
+  useDocumentTitle("Quienes somos");
+
+  return (
+    <Section>
+      <Prose>
+        <h1>Quienes somos</h1>
+        <p>
+          ¡Bienvenido a Full Stock! Somos tu destino en línea para encontrar una
+          increíble variedad de productos que se adaptan a tu estilo de vida.
+          Nacimos de una idea simple: hacer que las compras en línea sean una
+          experiencia fácil, rápida y satisfactoria para todos.
+        </p>
+        <h2>Nuestra Historia</h2>
+        <p>
+          Full Stock comenzó como un pequeño proyecto entre un grupo de
+          entusiastas de la tecnología y el buen diseño. Nos dimos cuenta de que
+          a menudo era difícil encontrar productos de calidad en un solo lugar y
+          con un servicio al cliente que realmente se preocupara. Decidimos
+          cambiar eso.
+        </p>
+        <p>
+          Desde nuestro humilde comienzo, hemos crecido hasta convertirnos en
+          una tienda en línea con un catálogo en constante expansión, pero
+          nuestra misión principal sigue siendo la misma.
+        </p>
+        <h2>Nuestra Misión</h2>
+        <p>
+          Nuestra misión es ofrecerte una selección cuidadosamente curada de
+          productos, combinada con una experiencia de compra sin complicaciones.
+          Queremos que cada visita a Full Stock sea inspiradora y que cada
+          compra te traiga satisfacción.
+        </p>
+        <h2>Nuestros Valores</h2>
+        <p>
+          Creemos firmemente en los pilares que nos han guiado desde el primer
+          día:
+        </p>
+        <ul>
+          <li>
+            <strong>Calidad Primero:</strong> Seleccionamos productos que no
+            solo se ven bien, sino que también cumplen con nuestros estándares
+            de calidad y durabilidad.
+          </li>
+          <li>
+            <strong>Pasión por el Cliente:</strong> Tu satisfacción es nuestra
+            máxima prioridad. Nuestro equipo está siempre dispuesto a ayudarte y
+            a asegurarse de que tu experiencia sea excepcional.
+          </li>
+          <li>
+            <strong>Innovación Constante:</strong> Estamos siempre buscando
+            nuevas formas de mejorar nuestra plataforma, nuestro catálogo y
+            nuestros servicios para ofrecerte lo mejor del mercado.
+          </li>
+          <li>
+            <strong>Simplicidad:</strong> Creemos que comprar en línea debe ser
+            un proceso sencillo y directo, desde la búsqueda del producto hasta
+            la - entrega en tu puerta.
+          </li>
+        </ul>
+
+        <p>
+          Gracias por elegir Full Stock. ¡Te invitamos a explorar
+          <a href="#">nuestro catálogo</a> y descubrir todo lo que tenemos para
+          ofrecer!
+        </p>
+      </Prose>
+    </Section>
+  );
+}

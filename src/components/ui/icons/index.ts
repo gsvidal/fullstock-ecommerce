@@ -1,0 +1,13 @@
+export { default as CartIcon } from "./cart-icon";
+export { default as EyeIcon } from "./eye-icon";
+export { default as EyeOffIcon } from "./eye-off-icon";
+export { default as IdeaIcon } from "./idea-icon";
+export { default as MinusIcon } from "./minus-icon";
+export { default as MoonIcon } from "./moon-icon";
+export { default as PlusIcon } from "./plus-icon";
+export { default as ReturnIcon } from "./return-icon";
+export { default as RibbonIcon } from "./ribbon-icon";
+export { default as SunIcon } from "./sun-icon";
+export { default as TrashIcon } from "./trash-icon";
+export { default as TruckIcon } from "./truck-icon";
+export { default as XIcon } from "./x-icon";
