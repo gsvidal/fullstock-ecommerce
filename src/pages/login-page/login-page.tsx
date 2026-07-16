@@ -1,4 +1,5 @@
-import { useState, type SubmitEvent } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../providers/auth-provider";
 import {
@@ -9,7 +10,9 @@ import {
   Section,
 } from "../../components/ui";
 import { useDocumentTitle } from "../../hooks";
-import { ApiError, type FieldErrors } from "../../lib/api-error";
+import { ApiError } from "../../lib/api-error";
+import { applyServerFieldErrors } from "../../lib/apply-server-field-errors";
+import { loginSchema, type LoginFormValues } from "../../schemas/auth";
 import styles from "./styles.module.css";
 
 export default function LoginPage() {
@@ -17,34 +20,32 @@ export default function LoginPage() {
   const navigate = useNavigate();
   useDocumentTitle("Iniciar sesión");
 
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onTouched",
+    defaultValues: { email: "", password: "" },
+  });
 
-  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-
-    const email = String(formData.get("email"));
-    const password = String(formData.get("password"));
-
-    setFieldErrors(null);
-    setFormError(null);
-    setIsSubmitting(true);
+  async function onSubmit({ email, password }: LoginFormValues) {
     try {
       await login(email, password);
       navigate("/");
     } catch (error) {
       if (error instanceof ApiError && error.status === 422 && error.fields) {
-        setFieldErrors(error.fields);
+        applyServerFieldErrors(error.fields, setError);
       } else if (error instanceof ApiError && error.status === 401) {
-        setFormError(error.message);
+        setError("root", { message: error.message });
       } else {
         console.error(error);
-        setFormError("No pudimos iniciar sesión. Intenta de nuevo.");
+        setError("root", {
+          message: "No pudimos iniciar sesión. Intenta de nuevo.",
+        });
       }
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -54,24 +55,22 @@ export default function LoginPage() {
         <h1 className={styles["login__title"]}>Inicia sesión en tu cuenta</h1>
         <form
           className={styles["login__form"]}
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
           <InputField
             label="Correo electrónico"
-            name="email"
             type="email"
             autoComplete="email"
-            required
-            errors={fieldErrors?.email}
+            error={errors.email?.message}
+            {...register("email")}
           />
 
           <PasswordField
             label="Contraseña"
-            name="password"
             autoComplete="current-password"
-            required
-            errors={fieldErrors?.password}
+            error={errors.password?.message}
+            {...register("password")}
           />
 
           <Button
@@ -83,9 +82,9 @@ export default function LoginPage() {
             {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
           </Button>
 
-          {formError && (
+          {errors.root?.message && (
             <p className={styles["login__error"]} role="alert">
-              {formError}
+              {errors.root.message}
             </p>
           )}
         </form>

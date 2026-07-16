@@ -145,7 +145,7 @@ export default function CheckoutPage() {
                 required
                 defaultValue={user?.email ?? ""}
                 readOnly={user !== null}
-                errors={fieldErrors?.email}
+                error={fieldErrors?.email[0]}
               />
             </fieldset>
 
@@ -183,7 +183,7 @@ export default function CheckoutPage() {
                       name={field.name}
                       autoComplete={field.autoComplete}
                       required={field.required}
-                      errors={fieldErrors?.[field.name]}
+                      error={fieldErrors?.[field.name][0]}
                     />
                   ),
                 )}

@@ -1,10 +1,10 @@
-import { useState, type ComponentPropsWithoutRef } from "react";
+import { useState, type ComponentPropsWithRef } from "react";
 import clsx from "clsx";
 import Button from "../button";
 import styles from "./styles.module.css";
 import { EyeIcon, EyeOffIcon } from "../icons";
 
-type PasswordInputProps = Omit<ComponentPropsWithoutRef<"input">, "type">;
+type PasswordInputProps = Omit<ComponentPropsWithRef<"input">, "type">;
 
 export default function PasswordInput({
   className,

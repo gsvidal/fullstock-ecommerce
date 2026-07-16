@@ -1,4 +1,5 @@
-import { useState, type SubmitEvent } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../providers/auth-provider";
 import {
@@ -9,7 +10,9 @@ import {
   Section,
 } from "../../components/ui";
 import { useDocumentTitle } from "../../hooks";
-import { ApiError, type FieldErrors } from "../../lib/api-error";
+import { ApiError } from "../../lib/api-error";
+import { applyServerFieldErrors } from "../../lib/apply-server-field-errors";
+import { signupSchema, type SignupFormValues } from "../../schemas/auth";
 import styles from "./styles.module.css";
 
 export default function SignupPage() {
@@ -17,41 +20,32 @@ export default function SignupPage() {
   const navigate = useNavigate();
   useDocumentTitle("Crear cuenta");
 
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    mode: "onTouched",
+    defaultValues: { email: "", password: "", confirmPassword: "" },
+  });
 
-  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-
-    const email = String(formData.get("email"));
-    const password = String(formData.get("password"));
-    const confirmPassword = String(formData.get("confirmPassword"));
-
-    setFieldErrors(null);
-    setFormError(null);
-
-    if (password !== confirmPassword) {
-      setFieldErrors({ confirmPassword: ["Las contraseñas no coinciden"] });
-      return;
-    }
-
-    setIsSubmitting(true);
+  async function onSubmit({ email, password }: SignupFormValues) {
     try {
       await signup(email, password);
       navigate("/");
     } catch (error) {
       if (error instanceof ApiError && error.status === 422 && error.fields) {
-        setFieldErrors(error.fields);
+        applyServerFieldErrors(error.fields, setError);
       } else if (error instanceof ApiError && error.status === 409) {
-        setFieldErrors({ email: [error.message] });
+        setError("email", { message: error.message });
       } else {
         console.error(error);
-        setFormError("No pudimos crear tu cuenta. Intenta de nuevo.");
+        setError("root", {
+          message: "No pudimos crear tu cuenta. Intenta de nuevo.",
+        });
       }
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -61,32 +55,29 @@ export default function SignupPage() {
         <h1 className={styles["signup__title"]}>Crea una cuenta</h1>
         <form
           className={styles["signup__form"]}
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
           <InputField
             label="Correo electrónico"
-            name="email"
             type="email"
             autoComplete="email"
-            required
-            errors={fieldErrors?.email}
+            error={errors.email?.message}
+            {...register("email")}
           />
 
           <PasswordField
             label="Contraseña"
-            name="password"
             autoComplete="new-password"
-            required
-            errors={fieldErrors?.password}
+            error={errors.password?.message}
+            {...register("password")}
           />
 
           <PasswordField
             label="Confirma tu contraseña"
-            name="confirmPassword"
             autoComplete="new-password"
-            required
-            errors={fieldErrors?.confirmPassword}
+            error={errors.confirmPassword?.message}
+            {...register("confirmPassword")}
           />
 
           <Button
@@ -98,9 +89,9 @@ export default function SignupPage() {
             {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
 
-          {formError && (
+          {errors.root?.message && (
             <p className={styles["signup__error"]} role="alert">
-              {formError}
+              {errors.root.message}
             </p>
           )}
         </form>
