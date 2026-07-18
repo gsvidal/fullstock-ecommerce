@@ -113,6 +113,14 @@
   gap: 1.5rem;
 }
 
+.checkout__error {
+  color: var(--error);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
 .checkout__submit {
   width: 100%;
   margin-top: 1.5rem;

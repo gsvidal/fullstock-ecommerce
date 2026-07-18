@@ -1,7 +1,9 @@
-import { useState, type SubmitEvent } from "react";
 import { Navigate, useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../../providers/auth-provider";
 import { useCart } from "../../providers/cart-provider";
+import { useEffect } from "react";
 import {
   Button,
   Container,
@@ -14,10 +16,15 @@ import {
 } from "../../components/ui";
 import { XIcon } from "../../components/ui/icons";
 import { useDocumentTitle } from "../../hooks";
-import { ApiError, type FieldErrors } from "../../lib/api-error";
+import { ApiError } from "../../lib/api-error";
 import { formatPrice } from "../../lib/format-price";
 import { createOrder } from "../../services";
-import type { ShippingInfo } from "../../types";
+import { applyServerFieldErrors } from "../../lib/apply-server-field-errors";
+import {
+  checkoutSchema,
+  type CheckoutFormValues,
+  type CheckoutFormInput,
+} from "../../schemas/checkout";
 import { COUNTRIES, SHIPPING_FIELDS } from "./fields";
 import styles from "./styles.module.css";
 
@@ -27,9 +34,34 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   useDocumentTitle("Checkout");
 
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    setValue,
+  } = useForm<CheckoutFormInput, unknown, CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema),
+    mode: "onTouched",
+    defaultValues: {
+      email: user?.email ?? "",
+      firstName: "",
+      lastName: "",
+      company: "",
+      address: "",
+      city: "",
+      country: "",
+      region: "",
+      zipCode: "",
+      phone: "",
+    },
+  });
+
+  useEffect(() => {
+    if (user?.email) {
+      setValue("email", user.email);
+    }
+  }, [user?.email, setValue]);
 
   if (cartStatus === "error" || authStatus === "error") {
     return (
@@ -52,43 +84,22 @@ export default function CheckoutPage() {
     return <Navigate to="/cart" replace />;
   }
 
-  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-
-    const values = Object.fromEntries(formData);
-
-    const shippingInfo: ShippingInfo = {
-      email: String(values.email),
-      firstName: String(values.firstName),
-      lastName: String(values.lastName),
-      // La compañía es opcional: si viene vacía, enviamos null.
-      company:
-        String(values.company).trim() === "" ? null : String(values.company),
-      address: String(values.address),
-      city: String(values.city),
-      country: String(values.country),
-      region: String(values.region),
-      zipCode: String(values.zipCode),
-      phone: String(values.phone),
-    };
-
-    setFieldErrors(null);
-    setFormError(null);
-    setIsSubmitting(true);
+  async function onSubmit(shippingInfo: CheckoutFormValues) {
     try {
       const order = await createOrder(shippingInfo);
       navigate(`/order-confirmation?orderId=${order.id}`);
       await refresh();
     } catch (error) {
       if (error instanceof ApiError && error.status === 422 && error.fields) {
-        setFieldErrors(error.fields);
+        applyServerFieldErrors(error.fields, setError);
+      } else if (error instanceof ApiError && error.status === 400) {
+        setError("root", { message: error.message });
       } else {
         console.error(error);
-        setFormError("No pudimos procesar tu orden. Intenta de nuevo.");
+        setError("root", {
+          message: "No pudimos procesar tu orden. Intenta de nuevo.",
+        });
       }
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -130,7 +141,7 @@ export default function CheckoutPage() {
           </div>
           <form
             className={styles["checkout__form"]}
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             noValidate
           >
             <fieldset>
@@ -139,13 +150,12 @@ export default function CheckoutPage() {
               </legend>
               <InputField
                 label="Correo electrónico"
-                name="email"
                 type="email"
                 autoComplete="email"
                 required
-                defaultValue={user?.email ?? ""}
                 readOnly={user !== null}
-                error={fieldErrors?.email[0]}
+                error={errors.email?.message}
+                {...register("email")}
               />
             </fieldset>
 
@@ -161,11 +171,12 @@ export default function CheckoutPage() {
                     <SelectField
                       key={field.name}
                       label={field.label}
-                      name={field.name}
                       autoComplete={field.autoComplete}
-                      defaultValue=""
                       required={field.required}
-                      errors={fieldErrors?.[field.name]}
+                      error={
+                        errors[field.name]?.message
+                      }
+                      {...register(field.name)}
                     >
                       <option value="" disabled>
                         Seleccionar país
@@ -180,21 +191,17 @@ export default function CheckoutPage() {
                     <InputField
                       key={field.name}
                       label={field.label}
-                      name={field.name}
                       autoComplete={field.autoComplete}
                       required={field.required}
-                      error={fieldErrors?.[field.name][0]}
+                      error={
+                        errors[field.name]?.message
+                      }
+                      {...register(field.name)}
                     />
                   ),
                 )}
               </div>
             </fieldset>
-
-            {formError && (
-              <p className={styles["checkout__error"]} role="alert">
-                {formError}
-              </p>
-            )}
 
             <Button
               type="submit"
@@ -204,6 +211,12 @@ export default function CheckoutPage() {
             >
               {isSubmitting ? "Procesando..." : "Confirmar Orden"}
             </Button>
+
+            {errors.root?.message && (
+              <p className={styles["checkout__error"]} role="alert">
+                {errors.root.message}
+              </p>
+            )}
           </form>
         </div>
       </Container>

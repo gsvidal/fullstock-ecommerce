@@ -1,22 +1,21 @@
-import { useId, type ComponentPropsWithoutRef } from "react";
+import { useId, type ComponentPropsWithRef } from "react";
 import { errorAttributes } from "./error-attributes";
 import Field from "./field";
 
-type SelectFieldProps = ComponentPropsWithoutRef<"select"> & {
+type SelectFieldProps = ComponentPropsWithRef<"select"> & {
   label: string;
-  errors?: string[];
+  error?: string;
 };
 
 export default function SelectField({
   label,
-  errors,
+  error,
   id,
   children,
   ...delegated
 }: SelectFieldProps) {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
-  const error = errors?.[0];
 
   return (
     <Field id={fieldId} label={label} error={error}>
