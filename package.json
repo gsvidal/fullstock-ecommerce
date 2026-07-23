@@ -14,16 +14,19 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-error-boundary": "^6.1.2",
     "react-hook-form": "^7.81.0",
     "react-router": "^8.1.0",
+    "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -33,6 +36,8 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "prettier": "3.9.5",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12"

@@ -12,7 +12,7 @@ html.light {
 }
 
 body {
-  font-family: var(--family-text);
+  font-family: var(--font-text);
   font-size: 1rem;
   line-height: 1.5rem;
 
@@ -26,15 +26,15 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--family-heading);
+  font-family: var(--font-heading);
 }
 
 code {
-  font-family: var(--family-monospace);
+  font-family: var(--font-code);
 }
 
 em {
-  font-family: var(--family-emphasis);
+  font-family: var(--font-emphasis);
 }
 
 hr {

@@ -1,0 +1,22 @@
+/* TEMPORAL — BORRAR AL TERMINAR LA MIGRACIÓN.
+   Alias de los tokens legacy (--foreground, ...) a los del @theme (--color-*),
+   para los componentes que aún no migran. */
+:root {
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
+  --accent-background: var(--color-accent-background);
+  --accent-foreground: var(--color-accent-foreground);
+  --muted-background: var(--color-muted-background);
+  --muted-foreground: var(--color-muted-foreground);
+  --primary-background: var(--color-primary-background);
+  --primary-foreground: var(--color-primary-foreground);
+  --primary-background-hover: var(--color-primary-background-hover);
+  --secondary-background: var(--color-secondary-background);
+  --secondary-foreground: var(--color-secondary-foreground);
+  --secondary-background-hover: var(--color-secondary-background-hover);
+  --border: var(--color-border);
+  --border-hover: var(--color-border-hover);
+  --outline: var(--color-outline);
+  --separator: var(--color-separator);
+  --error: var(--color-error);
+}

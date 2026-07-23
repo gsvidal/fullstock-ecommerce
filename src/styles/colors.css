@@ -1,3 +1,4 @@
+/* Primitivos. Fuera de @theme (sin utilidades sobre colores base) */
 :root {
   --white: hsl(0 0% 100%);
   --black: hsl(0 0% 0%);
@@ -55,23 +56,4 @@
   --neutral-contrast: var(--white);
 
   --base-background: light-dark(var(--white), var(--neutral-1));
-
-  /* Tokens de color */
-  --background: var(--base-background);
-  --foreground: var(--neutral-12);
-  --accent-background: var(--accent-3);
-  --accent-foreground: var(--accent-11);
-  --muted-background: var(--neutral-a2);
-  --muted-foreground: var(--neutral-11);
-  --primary-background: var(--accent-9);
-  --primary-foreground: var(--accent-contrast);
-  --secondary-background: var(--neutral-3);
-  --secondary-foreground: var(--neutral-11);
-  --border: var(--neutral-7);
-  --outline: var(--accent-11);
-  --separator: var(--neutral-6);
-  --primary-background-hover: var(--accent-10);
-  --secondary-background-hover: var(--neutral-4);
-  --border-hover: var(--neutral-8);
-  --error: hsl(10 82% 45%);
 }

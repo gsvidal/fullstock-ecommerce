@@ -1,8 +1,47 @@
-/* Lo único que sigue siendo global: las fundaciones. Todo lo demás vive en el
-   CSS Module del componente que lo usa. */
-@layer definitions, reset, global;
+@import "tailwindcss";
 
-@import "./colors.css" layer(definitions);
-@import "./typography.css" layer(definitions);
-@import "./reset.css" layer(reset);
-@import "./global.css" layer(global);
+/* Primitivos fuera de @theme. */
+@import "./colors.css";
+
+/* Remapea el variant `dark:` al toggle por clase (.dark), no a prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Solo los tokens semánticos/tipográficos van a @theme: generan las utilidades. */
+@theme {
+  --color-background: var(--base-background);
+  --color-foreground: var(--neutral-12);
+  --color-accent-background: var(--accent-3);
+  --color-accent-foreground: var(--accent-11);
+  --color-muted-background: var(--neutral-a2);
+  --color-muted-foreground: var(--neutral-11);
+  --color-primary-background: var(--accent-9);
+  --color-primary-foreground: var(--accent-contrast);
+  --color-secondary-background: var(--neutral-3);
+  --color-secondary-foreground: var(--neutral-11);
+  --color-border: var(--neutral-7);
+  --color-outline: var(--accent-11);
+  --color-separator: var(--neutral-6);
+  --color-primary-background-hover: var(--accent-10);
+  --color-secondary-background-hover: var(--neutral-4);
+  --color-border-hover: var(--neutral-8);
+  --color-error: hsl(10 82% 45%);
+
+  /* Font stacks (--font-* para que Tailwind genere font-*). */
+  --font-text:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-text);
+  --font-display:
+    "Protest Guerrilla", "Protest Strike", "Stencil", "Impact", sans-serif;
+  --font-code:
+    "Source Code Pro", "Menlo", "Consolas", "Monaco", "Courier New", monospace;
+  --font-emphasis:
+    "Lora", "Georgia", "Palatino Linotype", "Book Antiqua", "Times New Roman",
+    serif;
+}
+
+/* Puente temporal para componentes aún no migrados (ver legacy-tokens.css). */
+@import "./legacy-tokens.css";
+
+/* Después de tailwindcss y en layer(base) para que las utilidades puedan pisarlo. */
+@import "./global.css" layer(base);
