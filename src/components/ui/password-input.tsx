@@ -1,8 +1,7 @@
 import { useState, type ComponentPropsWithRef } from "react";
-import clsx from "clsx";
-import Button from "../button";
-import styles from "./styles.module.css";
-import { EyeIcon, EyeOffIcon } from "../icons";
+import Button from "./button";
+import { EyeIcon, EyeOffIcon } from "./icons";
+import { cn } from "../../lib/cn";
 
 type PasswordInputProps = Omit<ComponentPropsWithRef<"input">, "type">;
 
@@ -13,17 +12,17 @@ export default function PasswordInput({
   const [isVisible, setIsVisible] = useState(false);
 
   return (
-    <div className={styles["password-input"]}>
+    <div className="relative flex items-center">
       <input
         type={isVisible ? "text" : "password"}
-        className={clsx(styles["password-input__field"], className)}
+        className={cn("pr-10 aria-invalid:border-error", className)}
         {...delegated}
       />
       <Button
         type="button"
         variant="ghost"
         size="sm-icon"
-        className={styles["password-input__toggle"]}
+        className="absolute right-1.5 text-muted-foreground"
         aria-label={isVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
         onClick={() => setIsVisible(!isVisible)}
       >

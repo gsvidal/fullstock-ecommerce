@@ -1,6 +1,4 @@
 import type { ReactNode } from "react";
-import clsx from "clsx";
-import styles from "./styles.module.css";
 
 type FieldProps = {
   id: string;
@@ -17,16 +15,11 @@ type FieldProps = {
  */
 export default function Field({ id, label, error, children }: FieldProps) {
   return (
-    <div
-      className={clsx(
-        styles["input-field"],
-        error && styles["input-field--error"],
-      )}
-    >
+    <div className={"flex flex-col gap-2"}>
       <label htmlFor={id}>{label}</label>
       {children}
       {error && (
-        <span id={`${id}-error`} className={styles["input-field__error"]}>
+        <span id={`${id}-error`} className="text-xs font-medium text-error">
           {error}
         </span>
       )}

@@ -19,7 +19,12 @@ export default function SelectField({
 
   return (
     <Field id={fieldId} label={label} error={error}>
-      <select id={fieldId} {...errorAttributes(fieldId, error)} {...delegated}>
+      <select
+        id={fieldId}
+        {...errorAttributes(fieldId, error)}
+        {...delegated}
+        className="aria-invalid:border-error"
+      >
         {children}
       </select>
     </Field>

@@ -173,9 +173,7 @@ export default function CheckoutPage() {
                       label={field.label}
                       autoComplete={field.autoComplete}
                       required={field.required}
-                      error={
-                        errors[field.name]?.message
-                      }
+                      error={errors[field.name]?.message}
                       {...register(field.name)}
                     >
                       <option value="" disabled>
@@ -193,9 +191,7 @@ export default function CheckoutPage() {
                       label={field.label}
                       autoComplete={field.autoComplete}
                       required={field.required}
-                      error={
-                        errors[field.name]?.message
-                      }
+                      error={errors[field.name]?.message}
                       {...register(field.name)}
                     />
                   ),

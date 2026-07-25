@@ -19,7 +19,12 @@ export default function InputField({
 
   return (
     <Field id={fieldId} label={label} error={error}>
-      <input id={fieldId} {...errorAttributes(fieldId, error)} {...delegated} />
+      <input
+        id={fieldId}
+        {...errorAttributes(fieldId, error)}
+        {...delegated}
+        className="aria-invalid:border-error"
+      />
     </Field>
   );
 }
