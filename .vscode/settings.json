@@ -1,5 +1,6 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
-  "tailwindCSS.classFunctions": ["cva", "cn", "clsx"]
+  "tailwindCSS.classFunctions": ["cva", "cn", "clsx"],
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }
