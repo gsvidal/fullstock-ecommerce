@@ -1,7 +1,6 @@
 import { type SubmitEvent } from "react";
 import { Link } from "react-router";
-import { Button, Container, Section, Separator } from "../ui";
-import styles from "./styles.module.css";
+import { Button, Container, Section, Separator } from "./ui";
 
 type FooterProps = {
   className?: string;
@@ -12,18 +11,19 @@ export default function Footer({ className }: FooterProps) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    // La API todavía no tiene un endpoint de boletín. Sin el preventDefault, el
-    // navegador enviaría el formulario de forma nativa y recargaría la SPA.
     console.log("Suscripción al boletín:", formData.get("email"));
   }
 
   return (
     <footer className={className}>
       <Container>
-        <Section className={styles["footer__section"]}>
-          <div className={styles["footer__links"]}>
-            <ul role="list" className={styles["footer__list"]}>
-              <li className={styles["footer__title"]}>Tienda</li>
+        <Section className="flex flex-col gap-8 lg:flex-row">
+          <div className="flex grow flex-wrap gap-x-8 gap-y-4">
+            <ul
+              role="list"
+              className="flex grow basis-40 flex-col gap-6 text-sm/6 text-muted-foreground"
+            >
+              <li className="font-medium text-foreground">Tienda</li>
               <li>
                 <Link to="/categories/polos">Polos</Link>
               </li>
@@ -34,8 +34,11 @@ export default function Footer({ className }: FooterProps) {
                 <Link to="/categories/stickers">Stickers</Link>
               </li>
             </ul>
-            <ul role="list" className={styles["footer__list"]}>
-              <li className={styles["footer__title"]}>Compañía</li>
+            <ul
+              role="list"
+              className="flex grow basis-40 flex-col gap-6 text-sm/6 text-muted-foreground"
+            >
+              <li className="font-medium text-foreground">Compañía</li>
               <li>
                 <Link to="/about">Quienes somos</Link>
               </li>
@@ -46,8 +49,11 @@ export default function Footer({ className }: FooterProps) {
                 <Link to="/privacy">Privacidad</Link>
               </li>
             </ul>
-            <ul role="list" className={styles["footer__list"]}>
-              <li className={styles["footer__title"]}>Conecta</li>
+            <ul
+              role="list"
+              className="flex grow basis-40 flex-col gap-6 text-sm/6 text-muted-foreground"
+            >
+              <li className="font-medium text-foreground">Conecta</li>
               <li>
                 <a href="https://wa.me/" target="_blank">
                   WhatsApp
@@ -65,15 +71,14 @@ export default function Footer({ className }: FooterProps) {
               </li>
             </ul>
           </div>
-          <div className={styles["footer__newsletter"]}>
-            <p className={styles["footer__newsletter-title"]}>
-              Suscríbete a nuestro boletín
-            </p>
-            <p className={styles["footer__newsletter-text"]}>
+          <div className="max-w-md text-sm/6">
+            <p className="mb-6 font-medium">Suscríbete a nuestro boletín</p>
+            <p className="mb-2 text-muted-foreground">
               Recibe las últimas ofertas y descuentos en tu correo semanalmente.
             </p>
-            <form className={styles["footer__form"]} onSubmit={handleSubmit}>
+            <form className="flex gap-2" onSubmit={handleSubmit}>
               <input
+                className="grow"
                 type="email"
                 aria-label="Correo"
                 name="email"
@@ -88,7 +93,7 @@ export default function Footer({ className }: FooterProps) {
           </div>
         </Section>
         <Separator />
-        <small className={styles["footer__copyright"]}>
+        <small className="block py-6 text-center text-sm/6 text-muted-foreground">
           Todos los derechos reservados © Full Stock
         </small>
       </Container>
