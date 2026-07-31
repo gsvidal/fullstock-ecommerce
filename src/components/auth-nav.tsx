@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useAuth } from "../../providers/auth-provider";
-import { Button, Container } from "../ui";
-import styles from "./styles.module.css";
+import { useAuth } from "../providers/auth-provider";
+import { Button, Container } from "./ui";
 
 export default function AuthNav() {
   const { user, logout } = useAuth();
@@ -23,25 +22,27 @@ export default function AuthNav() {
   }
 
   return (
-    <div className={styles["auth-nav"]}>
-      <Container className={styles["auth-nav__container"]}>
+    <div className="bg-(--black) text-sm font-medium text-(--white)">
+      <Container className="flex h-10 items-center justify-end">
         <nav aria-label="Autenticación de usuario">
-          <ul className={styles["auth-nav__list"]}>
+          <ul className="flex items-center gap-4">
             {user ? (
               <>
+                {/* Esta barra siempre tiene fondo negro, y --error (hsl(10 82%
+                45%)) solo alcanza 4.3:1 sobre él: por debajo del 4.5:1 que
+                exige WCAG AA. Usamos una variante clara del mismo tono, que
+                llega a ~9:1. */}
                 {logoutError && (
-                  <li className={styles["auth-nav__error"]} role="alert">
+                  <li className="text-[hsl(10_90%_72%)]" role="alert">
                     {logoutError}
                   </li>
                 )}
-                <li className={styles["auth-nav__item"]}>
-                  Bienvenido {user.email}
-                </li>
-                <li className={styles["auth-nav__item"]}>
+                <li>Bienvenido {user.email}</li>
+                <li>
                   <Button
                     type="button"
                     variant="ghost"
-                    className={styles["auth-nav__button"]}
+                    className="text-(--white)"
                     onClick={handleLogout}
                     disabled={isLoggingOut}
                   >
@@ -51,13 +52,19 @@ export default function AuthNav() {
               </>
             ) : (
               <>
-                <li className={styles["auth-nav__item"]}>
-                  <Link to="/login" className={styles["auth-nav__link"]}>
+                <li>
+                  <Link
+                    to="/login"
+                    className="hover:underline hover:underline-offset-2"
+                  >
                     Iniciar sesión
                   </Link>
                 </li>
-                <li className={styles["auth-nav__item"]}>
-                  <Link to="/signup" className={styles["auth-nav__link"]}>
+                <li>
+                  <Link
+                    to="/signup"
+                    className="hover:underline hover:underline-offset-2"
+                  >
                     Crear una cuenta
                   </Link>
                 </li>
