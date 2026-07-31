@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button } from "../ui";
-import { MoonIcon, SunIcon } from "../ui/icons";
+import { Button } from "./ui";
+import { MoonIcon, SunIcon } from "./ui/icons";
 
 type Theme = "light" | "dark";
 
