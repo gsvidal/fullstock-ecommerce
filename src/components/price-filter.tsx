@@ -1,7 +1,6 @@
 import { type SubmitEvent } from "react";
-import clsx from "clsx";
-import { Button } from "../ui";
-import styles from "./styles.module.css";
+import { Button } from "./ui";
+import { cn } from "../lib/cn";
 
 type PriceFilterProps = {
   className?: string;
@@ -23,14 +22,14 @@ export default function PriceFilter({
 
   return (
     <form
-      className={clsx(styles["price-filter"], className)}
+      className={cn("flex flex-col gap-6", className)}
       onSubmit={handleSubmit}
     >
       <fieldset>
-        <legend className={styles["price-filter__legend"]}>Precio</legend>
-        <div className={styles["price-filter__inputs"]}>
-          <div className={styles["price-filter__field"]}>
-            <label htmlFor="minPrice" className={styles["price-filter__label"]}>
+        <legend className="mb-4 text-base font-medium">Precio</legend>
+        <div className="flex gap-6">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="minPrice" className="text-sm font-medium">
               Min
             </label>
             <input
@@ -42,8 +41,8 @@ export default function PriceFilter({
               defaultValue={defaultMinPrice}
             />
           </div>
-          <div className={styles["price-filter__field"]}>
-            <label htmlFor="maxPrice" className={styles["price-filter__label"]}>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="maxPrice" className="text-sm font-medium">
               Max
             </label>
             <input
@@ -57,12 +56,7 @@ export default function PriceFilter({
           </div>
         </div>
       </fieldset>
-      <Button
-        type="submit"
-        variant="secondary"
-        size="xl"
-        className={styles["price-filter__button"]}
-      >
+      <Button type="submit" variant="secondary" size="xl" className="w-full">
         Filtrar Productos
       </Button>
     </form>

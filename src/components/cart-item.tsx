@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useCart } from "../../providers/cart-provider";
-import type { CartItem as CartItemType } from "../../types";
-import { Button } from "../ui";
-import styles from "./styles.module.css";
-import { formatPrice } from "../../lib/format-price";
-import { MinusIcon, PlusIcon, TrashIcon } from "../ui/icons";
+import { useCart } from "../providers/cart-provider";
+import type { CartItem as CartItemType } from "../types";
+import { Button } from "./ui";
+import { formatPrice } from "../lib/format-price";
+import { MinusIcon, PlusIcon, TrashIcon } from "./ui/icons";
 
 type CartItemProps = {
   item: CartItemType;
@@ -48,17 +47,17 @@ export default function CartItem({ item }: CartItemProps) {
   }
 
   return (
-    <div className={styles["cart__item"]}>
-      <div className={styles["cart__item-image"]}>
+    <div className="flex gap-6 border-b border-b-border p-6">
+      <div className="w-20 rounded-xl bg-muted-background">
         <img
           src={item.product.imgSrc}
           alt={item.product.title}
-          className={styles["cart__item-image-content"]}
+          className="aspect-2/3 w-full object-contain"
         />
       </div>
-      <div className={styles["cart__item-details"]}>
-        <div className={styles["cart__item-header"]}>
-          <h2 className={styles["cart__item-title"]}>{item.product.title}</h2>
+      <div className="flex grow flex-col justify-between">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-sm">{item.product.title}</h2>
           <Button
             type="button"
             variant="outline"
@@ -67,14 +66,14 @@ export default function CartItem({ item }: CartItemProps) {
             onClick={handleRemove}
             disabled={isPending}
           >
-            <TrashIcon className={styles["cart__item-icon"]} />
+            <TrashIcon />
           </Button>
         </div>
-        <div className={styles["cart__item-footer"]}>
-          <p className={styles["cart__item-price"]}>
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <p className="text-sm font-medium">
             {formatPrice(item.product.price)}
           </p>
-          <div className={styles["cart__item-quantity"]}>
+          <div className="flex items-center gap-4">
             <Button
               type="button"
               variant="outline"
@@ -85,9 +84,9 @@ export default function CartItem({ item }: CartItemProps) {
               onClick={handleDecrement}
               disabled={isPending}
             >
-              <MinusIcon className={styles["cart__item-icon"]} />
+              <MinusIcon />
             </Button>
-            <span className={styles["cart__item-quantity-display"]}>
+            <span className="flex size-8 items-center justify-center rounded-md border border-border px-4 py-2">
               {item.quantity}
             </span>
             <Button
@@ -98,12 +97,12 @@ export default function CartItem({ item }: CartItemProps) {
               onClick={handleIncrement}
               disabled={isPending}
             >
-              <PlusIcon className={styles["cart__item-icon"]} />
+              <PlusIcon />
             </Button>
           </div>
         </div>
         {error && (
-          <p className={styles["cart__item-error"]} role="alert">
+          <p className="mt-2 text-xs text-error" role="alert">
             {error}
           </p>
         )}
