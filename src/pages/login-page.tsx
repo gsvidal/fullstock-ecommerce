@@ -1,19 +1,18 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "../../providers/auth-provider";
+import { useAuth } from "../providers/auth-provider";
 import {
   Button,
   Container,
   InputField,
   PasswordField,
   Section,
-} from "../../components/ui";
-import { useDocumentTitle } from "../../hooks";
-import { ApiError } from "../../lib/api-error";
-import { applyServerFieldErrors } from "../../lib/apply-server-field-errors";
-import { loginSchema, type LoginFormValues } from "../../schemas/auth";
-import styles from "./styles.module.css";
+} from "../components/ui";
+import { useDocumentTitle } from "../hooks";
+import { ApiError } from "../lib/api-error";
+import { applyServerFieldErrors } from "../lib/apply-server-field-errors";
+import { loginSchema, type LoginFormValues } from "../schemas/auth";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -51,10 +50,12 @@ export default function LoginPage() {
 
   return (
     <Section>
-      <Container className={styles["login"]}>
-        <h1 className={styles["login__title"]}>Inicia sesión en tu cuenta</h1>
+      <Container className="max-w-sm">
+        <h1 className="mb-10 text-center text-2xl/7 font-bold">
+          Inicia sesión en tu cuenta
+        </h1>
         <form
-          className={styles["login__form"]}
+          className="flex flex-col gap-6"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
@@ -76,24 +77,22 @@ export default function LoginPage() {
           <Button
             type="submit"
             size="lg"
-            className={styles["login__submit"]}
+            className="w-full"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
           </Button>
 
           {errors.root?.message && (
-            <p className={styles["login__error"]} role="alert">
+            <p className="mt-2 text-center text-sm text-error" role="alert">
               {errors.root.message}
             </p>
           )}
         </form>
 
-        <div className={styles["login__footer"]}>
-          <span className={styles["login__footer_text"]}>
-            ¿Aún no tienes cuenta?
-          </span>
-          <Link to="/signup" className={styles["login__footer_link"]}>
+        <div className="mt-10 flex justify-center gap-2 text-sm/6">
+          <span className="text-muted-foreground">¿Aún no tienes cuenta?</span>
+          <Link to="/signup" className="text-accent-foreground hover:underline">
             Crea una cuenta
           </Link>
         </div>
