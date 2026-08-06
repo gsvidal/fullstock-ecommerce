@@ -1,12 +1,17 @@
 import { useParams, useSearchParams } from "react-router";
-import PriceFilter from "../../components/price-filter";
-import ProductCard from "../../components/product-card";
-import { Button, Container, MessageScreen, Spinner } from "../../components/ui";
-import { useDocumentTitle, useFetch } from "../../hooks";
-import { ApiError } from "../../lib/api-error";
-import { getCategory, getCategoryProducts } from "../../services";
-import NotFoundPage from "../not-found-page";
-import styles from "./styles.module.css";
+import PriceFilter from "../components/price-filter";
+import ProductCard from "../components/product-card";
+import {
+  Button,
+  Container,
+  MessageScreen,
+  Section,
+  Spinner,
+} from "../components/ui";
+import { useDocumentTitle, useFetch } from "../hooks";
+import { ApiError } from "../lib/api-error";
+import { getCategory, getCategoryProducts } from "../services";
+import NotFoundPage from "./not-found-page";
 
 function parsePrice(value: string | null): number | undefined {
   if (value === null || value.trim() === "") return undefined;
@@ -75,34 +80,36 @@ export default function CategoryPage() {
 
   return (
     <>
-      <section className={styles["category-header"]}>
+      <Section className={"border-b"}>
         <Container>
-          <div className={styles["category-header__content"]}>
-            <h1 className={styles["category-header__title"]}>
-              {category.title}
-            </h1>
-            <p className={styles["category-header__description"]}>
+          <div className={"max-w-3xl"}>
+            <h1 className={"mb-4 text-4xl leading-none font-bold"}>{category.title}</h1>
+            <p className={"text-sm text-muted-foreground"}>
               {category.description}
             </p>
           </div>
         </Container>
-      </section>
-      <section className={styles["products"]}>
+      </Section>
+      <Section>
         <Container>
-          <div className={styles["products__layout"]}>
+          <div className={"flex flex-col gap-8 lg:flex-row"}>
             <PriceFilter
               key={slug}
-              className={styles["products__price-filter"]}
+              className={"w-full max-w-sm lg:max-w-xs"}
               defaultMinPrice={searchParams.get("minPrice") ?? undefined}
               defaultMaxPrice={searchParams.get("maxPrice") ?? undefined}
               onFilter={handleFilter}
             />
             {visibleProducts.length === 0 ? (
-              <p className={styles["products__empty"]}>
+              <p className={"grow text-muted-foreground"}>
                 No hay productos en ese rango de precios.
               </p>
             ) : (
-              <div className={styles["products__grid"]}>
+              <div
+                className={
+                  "grid grow grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-8"
+                }
+              >
                 {visibleProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -110,7 +117,7 @@ export default function CategoryPage() {
             )}
           </div>
         </Container>
-      </section>
+      </Section>
     </>
   );
 }
