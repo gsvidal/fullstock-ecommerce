@@ -5,10 +5,9 @@ import {
   MessageScreen,
   Section,
   Spinner,
-} from "../../components/ui";
-import { useDocumentTitle, useFetch } from "../../hooks";
-import { getOrder } from "../../services";
-import styles from "./styles.module.css";
+} from "../components/ui";
+import { useDocumentTitle, useFetch } from "../hooks";
+import { getOrder } from "../services";
 
 export default function OrderConfirmationPage() {
   const [searchParams] = useSearchParams();
@@ -43,23 +42,17 @@ export default function OrderConfirmationPage() {
   }
 
   return (
-    <Section className={styles["order-confirmation"]}>
+    <Section>
       <Container>
-        <h1 className={styles["order-confirmation__title"]}>
+        <h1 className="mb-2 text-base font-medium text-accent-foreground">
           ¡Muchas gracias por tu compra!
         </h1>
-        <p className={styles["order-confirmation__heading"]}>
-          Tu orden está en camino
-        </p>
-        <p className={styles["order-confirmation__description"]}>
+        <p className="mb-2 text-4xl leading-none font-bold">Tu orden está en camino</p>
+        <p className="mb-12 text-muted-foreground">
           Llegaremos a la puerta de tu domicilio lo antes posible
         </p>
-        <p className={styles["order-confirmation__tracking-label"]}>
-          Número de orden
-        </p>
-        <p className={styles["order-confirmation__tracking-code"]}>
-          {order.id}
-        </p>
+        <p className="mb-2 text-sm font-medium">Número de orden</p>
+        <p className="text-sm font-medium text-accent-foreground">{order.id}</p>
       </Container>
     </Section>
   );
