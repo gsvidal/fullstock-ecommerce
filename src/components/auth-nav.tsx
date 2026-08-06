@@ -22,18 +22,20 @@ export default function AuthNav() {
   }
 
   return (
-    <div className="bg-(--black) text-sm font-medium text-(--white)">
+    <div className="dark bg-(--black) text-sm font-medium text-foreground">
+      {/*
+    .dark fija color-scheme: dark en este subárbol para que light-dark()
+    resuelva la rama oscura (texto, error, etc.).
+    bg-(--black) da superficie propia (negro puro): en tema oscuro la franja
+    no se fusiona con el bg-background del header.
+    */}
       <Container className="flex h-10 items-center justify-end">
         <nav aria-label="Autenticación de usuario">
           <ul className="flex items-center gap-4">
             {user ? (
               <>
-                {/* Esta barra siempre tiene fondo negro, y --error (hsl(10 82%
-                45%)) solo alcanza 4.3:1 sobre él: por debajo del 4.5:1 que
-                exige WCAG AA. Usamos una variante clara del mismo tono, que
-                llega a ~9:1. */}
                 {logoutError && (
-                  <li className="text-[hsl(10_90%_72%)]" role="alert">
+                  <li className="text-error" role="alert">
                     {logoutError}
                   </li>
                 )}
@@ -42,7 +44,7 @@ export default function AuthNav() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="text-(--white)"
+                    className="text-inherit"
                     onClick={handleLogout}
                     disabled={isLoggingOut}
                   >

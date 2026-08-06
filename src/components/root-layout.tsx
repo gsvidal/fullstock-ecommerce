@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Outlet, useLocation } from "react-router";
-import { logError } from "../../lib/log-error";
-import ErrorFallback from "../error-fallback";
-import Footer from "../footer";
-import Header from "../header";
-import { Button } from "../ui";
-import styles from "./styles.module.css";
+import { logError } from "../lib/log-error";
+import ErrorFallback from "./error-fallback";
+import Footer from "./footer";
+import Header from "./header";
+import { Button } from "./ui";
 
 export default function RootLayout() {
   // El navegador solo resetea el scroll cuando carga un documento nuevo, y en
@@ -18,8 +17,8 @@ export default function RootLayout() {
   }, [pathname]);
 
   return (
-    <div className={styles.root}>
-      <Header className={styles["root__header"]} />
+    <div className="grid min-h-dvh grid-rows-[auto_1fr_auto]">
+      <Header className="sticky top-0 z-50 border-b border-b-border bg-background" />
       <main>
         <ErrorBoundary
           onError={logError}
@@ -35,7 +34,7 @@ export default function RootLayout() {
           <Outlet />
         </ErrorBoundary>
       </main>
-      <Footer className={styles["root__footer"]} />
+      <Footer className="border-t border-t-border" />
     </div>
   );
 }

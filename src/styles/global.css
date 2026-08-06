@@ -1,13 +1,26 @@
+:root {
+  /* AuthNav + HeaderMain + Separator + MainNav + border-b(RootLayout) */
+  --header-height: calc(2.5rem + 3rem + 1px + 3rem + 1px);
+}
+
+/* A partir de sm el header baja: MainNav pasa a absolute y el Separator se oculta */
+@media (min-width: 40rem) {
+  :root {
+    /* AuthNav + HeaderMain + border-b(RootLayout) */
+    --header-height: calc(2.5rem + 3rem + 1px);
+  }
+}
+
 html {
   scrollbar-gutter: stable;
   color-scheme: light dark;
 }
 
-html.dark {
+.dark {
   color-scheme: dark;
 }
 
-html.light {
+.light {
   color-scheme: light;
 }
 
@@ -70,12 +83,12 @@ fieldset {
   outline-offset: 2px;
 }
 
-/* Account for sticky header height (3rem) + gap (1rem) */
+/* Header sticky + 1rem de aire: el input enfocado no queda tapado bajo el header. */
 :focus,
 input,
 select,
 textarea {
-  scroll-margin-top: calc(5.5rem + 2.5rem);
+  scroll-margin-top: calc(var(--header-height) + 2rem);
 }
 
 * {

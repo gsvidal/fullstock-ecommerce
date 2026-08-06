@@ -25,7 +25,8 @@
   --color-primary-background-hover: var(--accent-10);
   --color-secondary-background-hover: var(--neutral-4);
   --color-border-hover: var(--neutral-8);
-  --color-error: hsl(10 82% 45%);
+  /* El rojo base en dark mode (~3.5:1) no cumple WCAG AA sobre fondos dark. */
+  --color-error: light-dark(hsl(10 82% 45%), hsl(10 90% 72%));
 
   /* Font stacks (--font-* para que Tailwind genere font-*). */
   --font-text:
