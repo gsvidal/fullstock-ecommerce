@@ -8,6 +8,8 @@ import {
 } from "../components/ui";
 import { useDocumentTitle, useFetch } from "../hooks";
 import { getOrder } from "../services";
+import { celebrate } from "../lib/confetti-celebration";
+import { useEffect } from "react";
 
 export default function OrderConfirmationPage() {
   const [searchParams] = useSearchParams();
@@ -19,6 +21,14 @@ export default function OrderConfirmationPage() {
     async () => (orderId ? getOrder(orderId) : null),
     [orderId],
   );
+
+  useEffect(() => {
+    if (!orderId || status !== "success") return;
+
+    const clearConfettiInterval = celebrate();
+
+    return clearConfettiInterval;
+  }, [orderId, status]);
 
   if (!orderId) {
     return <Navigate to="/" replace />;
@@ -47,7 +57,9 @@ export default function OrderConfirmationPage() {
         <h1 className="mb-2 text-base font-medium text-accent-foreground">
           ¡Muchas gracias por tu compra!
         </h1>
-        <p className="mb-2 text-4xl leading-none font-bold">Tu orden está en camino</p>
+        <p className="mb-2 text-4xl leading-none font-bold">
+          Tu orden está en camino
+        </p>
         <p className="mb-12 text-muted-foreground">
           Llegaremos a la puerta de tu domicilio lo antes posible
         </p>

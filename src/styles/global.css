@@ -29,8 +29,8 @@ body {
   font-size: 1rem;
   line-height: 1.5rem;
 
-  color: var(--foreground);
-  background-color: var(--background);
+  color: var(--color-foreground);
+  background-color: var(--color-background);
 }
 
 h1,
@@ -52,7 +52,7 @@ em {
 
 hr {
   border: none;
-  border-top: 1px solid var(--separator);
+  border-top: 1px solid var(--color-separator);
 }
 
 label {
@@ -62,16 +62,17 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   height: 2.5rem;
   width: 100%;
   padding: 0.5rem 0.75rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
 
   font-size: 0.875rem;
   line-height: 1.5rem;
-  background-color: var(--background);
+  background-color: var(--color-background);
 }
 
 fieldset {
@@ -79,7 +80,7 @@ fieldset {
 }
 
 :focus-visible {
-  outline: 2px solid var(--outline);
+  outline: 2px solid var(--color-outline);
   outline-offset: 2px;
 }
 
@@ -92,6 +93,5 @@ textarea {
 }
 
 * {
-  border-color: var(--border);
-  border-style: none;
+  border-color: var(--color-border);
 }

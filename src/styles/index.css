@@ -57,8 +57,5 @@
   --tw-prose-td-borders: var(--color-border);
 }
 
-/* Puente temporal para componentes aún no migrados (ver legacy-tokens.css). */
-@import "./legacy-tokens.css";
-
 /* Después de tailwindcss y en layer(base) para que las utilidades puedan pisarlo. */
 @import "./global.css" layer(base);

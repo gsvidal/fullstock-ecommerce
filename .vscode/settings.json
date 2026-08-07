@@ -3,5 +3,5 @@
   "editor.formatOnSave": true,
   "tailwindCSS.classFunctions": ["cva", "cn", "clsx"],
   "js/ts.tsdk.path": "./node_modules/typescript/lib",
-  "css.lint.unknownAtRules": "ignore"
+  "css.customData": [".vscode/tailwind.css-data.json"]
 }

@@ -16,7 +16,7 @@ export default function Category({ category }: CategoryProps) {
         />
       </div>
       <div>
-        <h3 className="mb-2 font-semibold group-hover:underline">
+        <h3 className="mb-2 font-semibold group-hover:underline group-focus-visible:underline">
           {category.title}
         </h3>
         <p className="text-sm text-muted-foreground">{category.description}</p>

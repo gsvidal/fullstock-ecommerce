@@ -80,11 +80,13 @@ export default function CategoryPage() {
 
   return (
     <>
-      <Section className={"border-b"}>
+      <Section className="border-b">
         <Container>
-          <div className={"max-w-3xl"}>
-            <h1 className={"mb-4 text-4xl leading-none font-bold"}>{category.title}</h1>
-            <p className={"text-sm text-muted-foreground"}>
+          <div className="max-w-3xl">
+            <h1 className="mb-4 text-4xl leading-none font-bold">
+              {category.title}
+            </h1>
+            <p className="text-sm text-muted-foreground">
               {category.description}
             </p>
           </div>
@@ -92,24 +94,20 @@ export default function CategoryPage() {
       </Section>
       <Section>
         <Container>
-          <div className={"flex flex-col gap-8 lg:flex-row"}>
+          <div className="flex flex-col gap-8 lg:flex-row">
             <PriceFilter
               key={slug}
-              className={"w-full max-w-sm lg:max-w-xs"}
+              className="w-full max-w-sm lg:max-w-xs"
               defaultMinPrice={searchParams.get("minPrice") ?? undefined}
               defaultMaxPrice={searchParams.get("maxPrice") ?? undefined}
               onFilter={handleFilter}
             />
             {visibleProducts.length === 0 ? (
-              <p className={"grow text-muted-foreground"}>
+              <p className="grow text-muted-foreground">
                 No hay productos en ese rango de precios.
               </p>
             ) : (
-              <div
-                className={
-                  "grid grow grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-8"
-                }
-              >
+              <div className="grid grow grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-8">
                 {visibleProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
