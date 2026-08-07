@@ -26,7 +26,6 @@ import {
   type CheckoutFormInput,
 } from "../../schemas/checkout";
 import { COUNTRIES, SHIPPING_FIELDS } from "./fields";
-import styles from "./styles.module.css";
 
 export default function CheckoutPage() {
   const { cart, status: cartStatus, refresh } = useCart();
@@ -104,48 +103,47 @@ export default function CheckoutPage() {
   }
 
   return (
-    <Section className={styles["checkout"]}>
+    <Section className="bg-muted-background">
       <Container>
-        <div className={styles["checkout__layout"]}>
-          <div className={styles["checkout__summary"]}>
-            <h2 className={styles["checkout__summary-title"]}>
-              Resumen de la orden
-            </h2>
-            <div className={styles["checkout__summary-container"]}>
+        <div className="mx-auto flex max-w-2xl flex-col gap-12 lg:max-w-none lg:flex-row lg:items-start">
+          <div className="grow lg:sticky lg:top-[calc(var(--header-height)+2rem)]">
+            <h2 className="mb-4 text-lg font-medium">Resumen de la orden</h2>
+            <div className="flex flex-col rounded-xl border border-border bg-background">
               {cart.items.map((item) => (
-                <div key={item.id} className={styles["checkout__item"]}>
-                  <div className={styles["checkout__item-image"]}>
+                <div
+                  key={item.id}
+                  className="flex gap-6 border-b border-b-border p-6"
+                >
+                  <div className="w-20 rounded-xl bg-muted-background">
                     <img
                       src={item.product.imgSrc}
                       alt={item.product.title}
-                      className={styles["checkout__item-image-content"]}
+                      className="aspect-square w-full object-contain"
                     />
                   </div>
-                  <div className={styles["checkout__item-details"]}>
-                    <h3 className={styles["checkout__item-title"]}>
-                      {item.product.title}
-                    </h3>
-                    <div className={styles["checkout__item-price"]}>
+                  <div className="flex grow flex-col justify-between">
+                    <h3 className="text-sm">{item.product.title}</h3>
+                    <div className="flex items-center gap-4 self-end text-sm font-medium">
                       <p>{item.quantity}</p>
-                      <XIcon className={styles["checkout__item-price-icon"]} />
+                      <XIcon className="size-4 text-muted-foreground" />
                       <p>{formatPrice(item.product.price)}</p>
                     </div>
                   </div>
                 </div>
               ))}
-              <div className={styles["checkout__total"]}>
+              <div className="flex justify-between p-6 text-base font-medium">
                 <p>Total</p>
                 <p>{formatPrice(cart.totalPrice)}</p>
               </div>
             </div>
           </div>
           <form
-            className={styles["checkout__form"]}
+            className="grow lg:order-first lg:max-w-4xl"
             onSubmit={handleSubmit(onSubmit)}
             noValidate
           >
-            <fieldset>
-              <legend className={styles["checkout__legend"]}>
+            <fieldset className="block w-full">
+              <legend className="mb-6 text-xl font-medium">
                 Información de contacto
               </legend>
               <InputField
@@ -159,13 +157,13 @@ export default function CheckoutPage() {
               />
             </fieldset>
 
-            <Separator className={styles["checkout__separator"]} />
+            <Separator className="my-6" />
 
-            <fieldset>
-              <legend className={styles["checkout__legend"]}>
+            <fieldset className="block w-full">
+              <legend className="mb-6 text-xl font-medium">
                 Información de envío
               </legend>
-              <div className={styles["checkout__form-fields"]}>
+              <div className="flex flex-col gap-6">
                 {SHIPPING_FIELDS.map((field) =>
                   "type" in field && field.type === "select" ? (
                     <SelectField
@@ -202,14 +200,14 @@ export default function CheckoutPage() {
             <Button
               type="submit"
               size="xl"
-              className={styles["checkout__submit"]}
+              className="mt-6 w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Procesando..." : "Confirmar Orden"}
             </Button>
 
             {errors.root?.message && (
-              <p className={styles["checkout__error"]} role="alert">
+              <p className="mt-6 text-center text-sm text-error" role="alert">
                 {errors.root.message}
               </p>
             )}
