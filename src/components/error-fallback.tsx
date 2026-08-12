@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { MessageScreen } from "../ui";
+import { MessageScreen } from "./ui";
 
 type ErrorFallbackProps = {
   children: ReactNode;

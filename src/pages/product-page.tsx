@@ -1,29 +1,30 @@
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useLoaderData, data, type LoaderFunctionArgs } from "react-router";
 import { useCart } from "../providers/cart-provider";
-import {
-  Button,
-  Container,
-  MessageScreen,
-  Section,
-  Separator,
-  Spinner,
-} from "../components/ui";
-import { useDocumentTitle, useFetch } from "../hooks";
-import { ApiError } from "../lib/api-error";
+import { Button, Container, Section, Separator } from "../components/ui";
+import { useDocumentTitle } from "../hooks";
 import { getProduct } from "../services";
-import NotFoundPage from "./not-found-page";
 import { formatPrice } from "../lib/format-price";
+import { ApiError } from "../lib/api-error";
+
+export async function loader({ params }: LoaderFunctionArgs) {
+  try {
+    const { slug } = params;
+    const product = await getProduct(slug!);
+    return { product };
+  } catch (error) {
+    // Que el producto no exista no es un fallo de la app: es una URL equivocada.
+    if (error instanceof ApiError && error.status === 404) {
+      throw data("Producto no encontrado", { status: 404 });
+    }
+    throw error;
+  }
+}
 
 export default function ProductPage() {
-  const { slug } = useParams();
-  const { status: cartStatus, addItem } = useCart();
+  const { product } = useLoaderData<typeof loader>();
 
-  const {
-    data: product,
-    error,
-    status,
-  } = useFetch(() => getProduct(slug!), [slug]);
+  const { status: cartStatus, addItem } = useCart();
 
   useDocumentTitle(product?.title ?? "Cargando...");
   const [isAdding, setIsAdding] = useState(false);
@@ -42,28 +43,6 @@ export default function ProductPage() {
     } finally {
       setIsAdding(false);
     }
-  }
-
-  if (status === "error") {
-    // El producto no existe: eso no es un fallo, es una URL equivocada.
-    if (error instanceof ApiError && error.status === 404) {
-      return <NotFoundPage />;
-    }
-
-    return (
-      <MessageScreen
-        title="Algo salió mal"
-        description="No pudimos cargar este producto."
-      >
-        <Button size="lg" onClick={() => window.location.reload()}>
-          Recargar la página
-        </Button>
-      </MessageScreen>
-    );
-  }
-
-  if (status === "loading") {
-    return <Spinner />;
   }
 
   return (
