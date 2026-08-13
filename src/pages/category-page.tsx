@@ -1,17 +1,16 @@
-import { useParams, useSearchParams } from "react-router";
+import {
+  useLoaderData,
+  data,
+  type LoaderFunctionArgs,
+  useSearchParams,
+  useParams,
+} from "react-router";
 import PriceFilter from "../components/price-filter";
 import ProductCard from "../components/product-card";
-import {
-  Button,
-  Container,
-  MessageScreen,
-  Section,
-  Spinner,
-} from "../components/ui";
-import { useDocumentTitle, useFetch } from "../hooks";
+import { Container, Section } from "../components/ui";
+import { useDocumentTitle } from "../hooks";
 import { ApiError } from "../lib/api-error";
 import { getCategory, getCategoryProducts } from "../services";
-import NotFoundPage from "./not-found-page";
 
 function parsePrice(value: string | null): number | undefined {
   if (value === null || value.trim() === "") return undefined;
@@ -19,64 +18,41 @@ function parsePrice(value: string | null): number | undefined {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
-export default function CategoryPage() {
-  const { slug } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  const { slug } = params;
 
-  const { data, error, status } = useFetch(
-    () => Promise.all([getCategory(slug!), getCategoryProducts(slug!)]),
-    [slug],
-  );
+  const url = new URL(request.url);
+  const minPriceParam = url.searchParams.get("minPrice");
+  const maxPriceParam = url.searchParams.get("maxPrice");
 
-  useDocumentTitle(data?.[0].title ?? "Cargando...");
+  const minPriceSoles = parsePrice(minPriceParam);
+  const maxPriceSoles = parsePrice(maxPriceParam);
 
-  function handleFilter(formData: FormData) {
-    const min = formData.get("minPrice");
-    const max = formData.get("maxPrice");
+  const minPrice =
+    minPriceSoles !== undefined ? Math.round(minPriceSoles * 100) : undefined;
+  const maxPrice =
+    maxPriceSoles !== undefined ? Math.round(maxPriceSoles * 100) : undefined;
 
-    const next = new URLSearchParams(searchParams);
-
-    if (typeof min === "string" && min.trim() !== "") next.set("minPrice", min);
-    else next.delete("minPrice");
-
-    if (typeof max === "string" && max.trim() !== "") next.set("maxPrice", max);
-    else next.delete("maxPrice");
-
-    setSearchParams(next);
-  }
-
-  if (status === "error") {
-    // La categoría no existe: eso no es un fallo, es una URL equivocada.
+  try {
+    const [category, products] = await Promise.all([
+      getCategory(slug!),
+      getCategoryProducts(slug!, { minPrice, maxPrice }),
+    ]);
+    return { category, products };
+  } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
-      return <NotFoundPage />;
+      throw data("Categoría no encontrada", { status: 404 });
     }
-
-    return (
-      <MessageScreen
-        title="Algo salió mal"
-        description="No pudimos cargar esta categoría."
-      >
-        <Button size="lg" onClick={() => window.location.reload()}>
-          Recargar la página
-        </Button>
-      </MessageScreen>
-    );
+    throw error;
   }
+}
 
-  if (status === "loading") {
-    return <Spinner />;
-  }
+export default function CategoryPage() {
+  const { category, products } = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+  const { slug } = useParams();
 
-  const [category, products] = data;
-
-  const minPrice = parsePrice(searchParams.get("minPrice"));
-  const maxPrice = parsePrice(searchParams.get("maxPrice"));
-  const visibleProducts = products.filter((product) => {
-    const priceInSoles = product.price / 100; // el precio viene en centavos
-    if (minPrice !== undefined && priceInSoles < minPrice) return false;
-    if (maxPrice !== undefined && priceInSoles > maxPrice) return false;
-    return true;
-  });
+  useDocumentTitle(category.title);
 
   return (
     <>
@@ -100,15 +76,14 @@ export default function CategoryPage() {
               className="w-full max-w-sm lg:max-w-xs"
               defaultMinPrice={searchParams.get("minPrice") ?? undefined}
               defaultMaxPrice={searchParams.get("maxPrice") ?? undefined}
-              onFilter={handleFilter}
             />
-            {visibleProducts.length === 0 ? (
+            {products.length === 0 ? (
               <p className="grow text-muted-foreground">
                 No hay productos en ese rango de precios.
               </p>
             ) : (
               <div className="grid grow grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-8">
-                {visibleProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>

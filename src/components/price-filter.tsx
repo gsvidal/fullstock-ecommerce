@@ -1,4 +1,4 @@
-import { type SubmitEvent } from "react";
+import { Form } from "react-router";
 import { Button } from "./ui";
 import { cn } from "../lib/cn";
 
@@ -6,25 +6,15 @@ type PriceFilterProps = {
   className?: string;
   defaultMinPrice?: string;
   defaultMaxPrice?: string;
-  onFilter: (formData: FormData) => void;
 };
 
 export default function PriceFilter({
   className,
   defaultMinPrice,
   defaultMaxPrice,
-  onFilter,
 }: PriceFilterProps) {
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    onFilter(new FormData(event.currentTarget));
-  }
-
   return (
-    <form
-      className={cn("flex flex-col gap-6", className)}
-      onSubmit={handleSubmit}
-    >
+    <Form method="get" className={cn("flex flex-col gap-6", className)}>
       <fieldset>
         <legend className="mb-4 text-base font-medium">Precio</legend>
         <div className="flex gap-6">
@@ -59,6 +49,6 @@ export default function PriceFilter({
       <Button type="submit" variant="secondary" size="xl" className="w-full">
         Filtrar Productos
       </Button>
-    </form>
+    </Form>
   );
 }

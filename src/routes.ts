@@ -1,7 +1,9 @@
 import { createBrowserRouter } from "react-router";
 import RootLayout from "./components/root-layout";
 import HomePage from "./pages/home-page";
-import CategoryPage from "./pages/category-page";
+import CategoryPage, {
+  loader as categoryPageLoader,
+} from "./pages/category-page";
 import ProductPage, { loader as productPageLoader } from "./pages/product-page";
 import CartPage from "./pages/cart-page";
 import CheckoutPage from "./pages/checkout-page";
@@ -26,7 +28,11 @@ export const router = createBrowserRouter([
         HydrateFallback: Spinner,
         children: [
           { index: true, Component: HomePage },
-          { path: "categories/:slug", Component: CategoryPage },
+          {
+            path: "categories/:slug",
+            Component: CategoryPage,
+            loader: categoryPageLoader,
+          },
           {
             path: "products/:slug",
             Component: ProductPage,
