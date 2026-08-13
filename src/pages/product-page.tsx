@@ -14,8 +14,8 @@ export async function loader({ params }: LoaderFunctionArgs) {
     return { product };
   } catch (error) {
     // Que el producto no exista no es un fallo de la app: es una URL equivocada.
-    if (error instanceof ApiError && error.status === 404) {
-      throw data("Producto no encontrado", { status: 404 });
+    if (error instanceof ApiError) {
+      throw data(error.message, { status: error.status });
     }
     throw error;
   }

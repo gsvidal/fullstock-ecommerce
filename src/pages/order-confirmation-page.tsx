@@ -1,55 +1,42 @@
-import { Navigate, useSearchParams } from "react-router";
 import {
-  Button,
-  Container,
-  MessageScreen,
-  Section,
-  Spinner,
-} from "../components/ui";
-import { useDocumentTitle, useFetch } from "../hooks";
+  redirect,
+  useLoaderData,
+  data,
+  type LoaderFunctionArgs,
+} from "react-router";
+import { Container, Section } from "../components/ui";
+import { useDocumentTitle } from "../hooks";
 import { getOrder } from "../services";
 import { celebrate } from "../lib/confetti-celebration";
+import { ApiError } from "../lib/api-error";
 import { useEffect } from "react";
+import { idSchema } from "../schemas/shared";
 
-export default function OrderConfirmationPage() {
-  const [searchParams] = useSearchParams();
-  const orderId = Number(searchParams.get("orderId"));
-  useDocumentTitle("Orden confirmada");
-
-  // Si el orderId no es válido, no pedimos nada (el guard de abajo redirige).
-  const { data: order, status } = useFetch(
-    async () => (orderId ? getOrder(orderId) : null),
-    [orderId],
+export async function loader({ url }: LoaderFunctionArgs) {
+  const { success, data: orderId } = idSchema.safeParse(
+    url.searchParams.get("orderId"),
   );
 
-  useEffect(() => {
-    if (!orderId || status !== "success") return;
-
-    const clearConfettiInterval = celebrate();
-
-    return clearConfettiInterval;
-  }, [orderId, status]);
-
-  if (!orderId) {
-    return <Navigate to="/" replace />;
+  if (success === false) {
+    return redirect("/");
   }
 
-  if (status === "error") {
-    return (
-      <MessageScreen
-        title="No encontramos tu orden"
-        description="El número de orden no corresponde a ninguna compra."
-      >
-        <Button href="/" size="lg">
-          Volver al Inicio
-        </Button>
-      </MessageScreen>
-    );
+  try {
+    const order = await getOrder(orderId);
+    return { order };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw data(error.message, { status: error.status });
+    }
+    throw error;
   }
+}
 
-  if (status === "loading" || order === null) {
-    return <Spinner />;
-  }
+export default function OrderConfirmationPage() {
+  const { order } = useLoaderData<typeof loader>();
+  useDocumentTitle("Orden confirmada");
+
+  useEffect(() => celebrate(), []);
 
   return (
     <Section>

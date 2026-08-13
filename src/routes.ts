@@ -1,13 +1,15 @@
 import { createBrowserRouter } from "react-router";
 import RootLayout from "./components/root-layout";
-import HomePage from "./pages/home-page";
 import CategoryPage, {
   loader as categoryPageLoader,
 } from "./pages/category-page";
+import HomePage, { loader as homePageLoader } from "./pages/home-page";
 import ProductPage, { loader as productPageLoader } from "./pages/product-page";
 import CartPage from "./pages/cart-page";
 import CheckoutPage from "./pages/checkout-page";
-import OrderConfirmationPage from "./pages/order-confirmation-page";
+import OrderConfirmationPage, {
+  loader as orderConfirmationPageLoader,
+} from "./pages/order-confirmation-page";
 import AboutPage from "./pages/about-page";
 import TermsPage from "./pages/terms-page";
 import PrivacyPage from "./pages/privacy-page";
@@ -27,7 +29,7 @@ export const router = createBrowserRouter([
         ErrorBoundary: RouteErrorBoundary,
         HydrateFallback: Spinner,
         children: [
-          { index: true, Component: HomePage },
+          { index: true, Component: HomePage, loader: homePageLoader },
           {
             path: "categories/:slug",
             Component: CategoryPage,
@@ -40,7 +42,11 @@ export const router = createBrowserRouter([
           },
           { path: "cart", Component: CartPage },
           { path: "checkout", Component: CheckoutPage },
-          { path: "order-confirmation", Component: OrderConfirmationPage },
+          {
+            path: "order-confirmation",
+            Component: OrderConfirmationPage,
+            loader: orderConfirmationPageLoader,
+          },
           { path: "about", Component: AboutPage },
           { path: "terms", Component: TermsPage },
           { path: "privacy", Component: PrivacyPage },

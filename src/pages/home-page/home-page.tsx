@@ -1,29 +1,23 @@
+import { useLoaderData } from "react-router";
 import Categories from "../../components/categories";
 import Features from "../../components/features";
 import Hero from "../../components/hero";
-import { Button, MessageScreen, Spinner } from "../../components/ui";
-import { useDocumentTitle, useFetch } from "../../hooks";
+import { useDocumentTitle } from "../../hooks";
 import { getCategories } from "../../services";
 
+export async function loader() {
+  const categories = await getCategories();
+  return { categories };
+}
+
 export default function HomePage() {
-  const { data: categories, status } = useFetch(() => getCategories(), []);
+  const { categories } = useLoaderData<typeof loader>();
   useDocumentTitle("Inicio");
 
   return (
     <>
       <Hero />
-      {status === "loading" && <Spinner />}
-      {status === "error" && (
-        <MessageScreen
-          title="Algo salió mal"
-          description="No pudimos cargar las categorías."
-        >
-          <Button size="lg" onClick={() => window.location.reload()}>
-            Recargar la página
-          </Button>
-        </MessageScreen>
-      )}
-      {status === "success" && <Categories categories={categories} />}
+      <Categories categories={categories} />
       <Features />
     </>
   );

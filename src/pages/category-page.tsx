@@ -40,8 +40,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     ]);
     return { category, products };
   } catch (error) {
-    if (error instanceof ApiError && error.status === 404) {
-      throw data("Categoría no encontrada", { status: 404 });
+    if (error instanceof ApiError) {
+      throw data(error.message, { status: error.status });
     }
     throw error;
   }
