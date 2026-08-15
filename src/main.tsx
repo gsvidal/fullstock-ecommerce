@@ -2,8 +2,6 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router/dom";
 import { ErrorBoundary } from "react-error-boundary";
-import { AuthProvider } from "./providers/auth-provider";
-import { CartProvider } from "./providers/cart-provider";
 import ErrorFallback from "./components/error-fallback";
 import { Button } from "./components/ui";
 import { logError } from "./lib/log-error";
@@ -22,11 +20,7 @@ createRoot(document.getElementById("root")!).render(
         </ErrorFallback>
       )}
     >
-      <AuthProvider>
-        <CartProvider>
-          <RouterProvider router={router} onError={logError} />
-        </CartProvider>
-      </AuthProvider>
+      <RouterProvider router={router} onError={logError} />
     </ErrorBoundary>
   </StrictMode>,
 );

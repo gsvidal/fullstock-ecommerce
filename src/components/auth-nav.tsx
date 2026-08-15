@@ -1,25 +1,14 @@
-import { useState } from "react";
-import { Link } from "react-router";
-import { useAuth } from "../providers/auth-provider";
+import { Link, useFetcher } from "react-router";
+import { useCurrentUser } from "../hooks";
 import { Button, Container } from "./ui";
+import type { logoutAction } from "../lib/logout-action";
 
 export default function AuthNav() {
-  const { user, logout } = useAuth();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const fetcher = useFetcher<typeof logoutAction>();
+  const user = useCurrentUser();
 
-  async function handleLogout() {
-    setLogoutError(null);
-    setIsLoggingOut(true);
-    try {
-      await logout();
-    } catch (error) {
-      console.error(error);
-      setLogoutError("No pudimos cerrar sesión.");
-    } finally {
-      setIsLoggingOut(false);
-    }
-  }
+  const logoutError = fetcher.data?.error;
+  const isLoggingOut = fetcher.state !== "idle";
 
   return (
     <div className="dark bg-(--black) text-sm font-medium text-foreground">
@@ -41,15 +30,16 @@ export default function AuthNav() {
                 )}
                 <li>Bienvenido {user.email}</li>
                 <li>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="text-inherit"
-                    onClick={handleLogout}
-                    disabled={isLoggingOut}
-                  >
-                    {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
-                  </Button>
+                  <fetcher.Form method="post" action="/logout">
+                    <Button
+                      type="submit"
+                      variant="ghost"
+                      className="text-inherit"
+                      disabled={isLoggingOut}
+                    >
+                      {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+                    </Button>
+                  </fetcher.Form>
                 </li>
               </>
             ) : (

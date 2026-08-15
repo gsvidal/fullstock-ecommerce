@@ -1,7 +1,6 @@
 import { Navigate, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../../providers/auth-provider";
 import { useCart } from "../../providers/cart-provider";
 import { useEffect } from "react";
 import {
@@ -15,7 +14,7 @@ import {
   Spinner,
 } from "../../components/ui";
 import { XIcon } from "../../components/ui/icons";
-import { useDocumentTitle } from "../../hooks";
+import { useCurrentUser, useDocumentTitle } from "../../hooks";
 import { ApiError } from "../../lib/api-error";
 import { formatPrice } from "../../lib/format-price";
 import { createOrder } from "../../services";
@@ -29,7 +28,7 @@ import { COUNTRIES, SHIPPING_FIELDS } from "./fields";
 
 export default function CheckoutPage() {
   const { cart, status: cartStatus, refresh } = useCart();
-  const { user, status: authStatus } = useAuth();
+  const user = useCurrentUser();
   const navigate = useNavigate();
   useDocumentTitle("Checkout");
 
@@ -62,7 +61,7 @@ export default function CheckoutPage() {
     }
   }, [user?.email, setValue]);
 
-  if (cartStatus === "error" || authStatus === "error") {
+  if (cartStatus === "error") {
     return (
       <MessageScreen
         title="Algo salió mal"
@@ -75,7 +74,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (cartStatus === "loading" || authStatus === "loading") {
+  if (cartStatus === "loading") {
     return <Spinner />;
   }
 

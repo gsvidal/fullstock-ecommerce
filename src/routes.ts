@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router";
-import RootLayout from "./components/root-layout";
+import RootLayout, { loader as rootLoader } from "./components/root-layout";
 import CategoryPage, {
   loader as categoryPageLoader,
 } from "./pages/category-page";
@@ -13,16 +13,20 @@ import OrderConfirmationPage, {
 import AboutPage from "./pages/about-page";
 import TermsPage from "./pages/terms-page";
 import PrivacyPage from "./pages/privacy-page";
-import LoginPage from "./pages/login-page";
-import SignupPage from "./pages/signup-page";
+import LoginPage, { action as loginAction } from "./pages/login-page";
+import SignupPage, { action as signupAction } from "./pages/signup-page";
 import NotFoundPage from "./pages/not-found-page";
-import GuestRoute from "./components/guest-route";
 import RouteErrorBoundary from "./components/route-error-boundary";
 import { Spinner } from "./components/ui";
+import { guestOnlyLoader } from "./lib/guest-only-loader";
+import { logoutAction } from "./lib/logout-action";
 
 export const router = createBrowserRouter([
   {
+    id: "root",
     Component: RootLayout,
+    loader: rootLoader,
+    HydrateFallback: Spinner,
     // TODO: Definir si debemos incluir un ErrorBoundary aquí.
     children: [
       {
@@ -51,10 +55,10 @@ export const router = createBrowserRouter([
           { path: "terms", Component: TermsPage },
           { path: "privacy", Component: PrivacyPage },
           {
-            Component: GuestRoute,
+            loader: guestOnlyLoader,
             children: [
-              { path: "login", Component: LoginPage },
-              { path: "signup", Component: SignupPage },
+              { path: "login", Component: LoginPage, action: loginAction },
+              { path: "signup", Component: SignupPage, action: signupAction },
             ],
           },
           { path: "*", Component: NotFoundPage },
@@ -62,4 +66,5 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  { path: "logout", action: logoutAction },
 ]);

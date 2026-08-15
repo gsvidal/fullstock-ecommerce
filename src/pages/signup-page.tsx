@@ -1,7 +1,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router";
-import { useAuth } from "../providers/auth-provider";
+import {
+  Link,
+  replace,
+  useActionData,
+  useSubmit,
+  type ActionFunctionArgs,
+} from "react-router";
 import {
   Button,
   Container,
@@ -13,10 +18,35 @@ import { useDocumentTitle } from "../hooks";
 import { ApiError } from "../lib/api-error";
 import { applyServerFieldErrors } from "../lib/apply-server-field-errors";
 import { signupSchema, type SignupFormValues } from "../schemas/auth";
+import { createUser } from "../services";
+import { useEffect } from "react";
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const email = String(formData.get("email"));
+  const password = String(formData.get("password"));
+
+  try {
+    await createUser(email, password);
+    return replace("/");
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 422 && error.fields) {
+      return { fields: error.fields };
+    }
+    if (error instanceof ApiError && error.status === 409) {
+      return { fields: { email: [error.message] } };
+    }
+    if (error instanceof ApiError && error.status === 401) {
+      return { root: error.message };
+    }
+    throw error;
+  }
+}
 
 export default function SignupPage() {
-  const { signup } = useAuth();
-  const navigate = useNavigate();
+  const submit = useSubmit();
+  const actionData = useActionData<typeof action>();
+
   useDocumentTitle("Crear cuenta");
 
   const {
@@ -30,22 +60,13 @@ export default function SignupPage() {
     defaultValues: { email: "", password: "", confirmPassword: "" },
   });
 
+  useEffect(() => {
+    if (actionData?.fields) applyServerFieldErrors(actionData.fields, setError);
+    if (actionData?.root) setError("root", { message: actionData.root });
+  }, [actionData, setError]);
+
   async function onSubmit({ email, password }: SignupFormValues) {
-    try {
-      await signup(email, password);
-      navigate("/");
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 422 && error.fields) {
-        applyServerFieldErrors(error.fields, setError);
-      } else if (error instanceof ApiError && error.status === 409) {
-        setError("email", { message: error.message });
-      } else {
-        console.error(error);
-        setError("root", {
-          message: "No pudimos crear tu cuenta. Intenta de nuevo.",
-        });
-      }
-    }
+    submit({ email, password }, { method: "post" });
   }
 
   return (

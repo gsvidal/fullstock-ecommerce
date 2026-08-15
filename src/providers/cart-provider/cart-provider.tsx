@@ -6,8 +6,8 @@ import {
   updateCartItem,
 } from "../../services";
 import type { Cart, Status } from "../../types";
-import { useAuth } from "../auth-provider";
 import { CartContext } from "./cart-context";
+import { useCurrentUser } from "../../hooks";
 
 type CartProviderProps = {
   children: ReactNode;
@@ -16,7 +16,8 @@ type CartProviderProps = {
 export default function CartProvider({ children }: CartProviderProps) {
   const [cart, setCart] = useState<Cart | null>(null);
   const [status, setStatus] = useState<Status>("loading");
-  const { user } = useAuth();
+  const user = useCurrentUser();
+
   const userId = user?.id ?? null;
 
   useEffect(() => {

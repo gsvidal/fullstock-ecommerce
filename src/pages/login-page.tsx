@@ -1,7 +1,14 @@
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router";
-import { useAuth } from "../providers/auth-provider";
+import {
+  Link,
+  replace,
+  useActionData,
+  useSubmit,
+  type ActionFunctionArgs,
+} from "react-router";
+
 import {
   Button,
   Container,
@@ -13,10 +20,30 @@ import { useDocumentTitle } from "../hooks";
 import { ApiError } from "../lib/api-error";
 import { applyServerFieldErrors } from "../lib/apply-server-field-errors";
 import { loginSchema, type LoginFormValues } from "../schemas/auth";
+import { createSession } from "../services";
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const email = String(formData.get("email"));
+  const password = String(formData.get("password"));
+
+  try {
+    await createSession(email, password);
+    return replace("/");
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 422 && error.fields) {
+      return { fields: error.fields };
+    }
+    if (error instanceof ApiError && error.status === 401) {
+      return { root: error.message };
+    }
+    throw error;
+  }
+}
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const submit = useSubmit();
+  const actionData = useActionData<typeof action>();
   useDocumentTitle("Iniciar sesión");
 
   const {
@@ -30,22 +57,13 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" },
   });
 
-  async function onSubmit({ email, password }: LoginFormValues) {
-    try {
-      await login(email, password);
-      navigate("/");
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 422 && error.fields) {
-        applyServerFieldErrors(error.fields, setError);
-      } else if (error instanceof ApiError && error.status === 401) {
-        setError("root", { message: error.message });
-      } else {
-        console.error(error);
-        setError("root", {
-          message: "No pudimos iniciar sesión. Intenta de nuevo.",
-        });
-      }
-    }
+  useEffect(() => {
+    if (actionData?.fields) applyServerFieldErrors(actionData.fields, setError);
+    if (actionData?.root) setError("root", { message: actionData.root });
+  }, [actionData, setError]);
+
+  async function onSubmit(values: LoginFormValues) {
+    submit(values, { method: "post" });
   }
 
   return (
