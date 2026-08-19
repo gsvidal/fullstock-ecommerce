@@ -3,13 +3,14 @@ import Footer from "./footer";
 import Header from "./header";
 import { getCurrentUser } from "../services";
 import { CartProvider } from "../providers/cart-provider";
+import { logError } from "../lib/log-error";
 
 export async function loader() {
   try {
     const user = await getCurrentUser();
     return { user };
   } catch (error) {
-    console.error(error); // TODO: error de aplicación?
+    logError(error);
     return { user: null };
   }
 }
