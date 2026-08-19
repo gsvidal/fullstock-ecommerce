@@ -1,11 +1,14 @@
-import { useCart } from "../providers/cart-provider";
+import { useCurrentCart } from "../hooks/use-current-cart";
 import ThemeToggler from "./theme-toggler";
 import { Button } from "./ui";
 import { CartIcon } from "./ui/icons";
 
 export default function HeaderActions() {
-  const { cart } = useCart();
-  const cartItemsCount = cart?.totalQuantity ?? 0;
+  const cartResult = useCurrentCart();
+
+  const cartItemsCount = cartResult.ok
+    ? (cartResult.cart?.totalQuantity ?? 0)
+    : 0;
 
   return (
     <div className="flex items-center gap-2">

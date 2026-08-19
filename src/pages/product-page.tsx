@@ -1,11 +1,16 @@
-import { useState } from "react";
-import { useLoaderData, data, type LoaderFunctionArgs } from "react-router";
-import { useCart } from "../providers/cart-provider";
+import {
+  useLoaderData,
+  data,
+  type LoaderFunctionArgs,
+  useFetcher,
+} from "react-router";
 import { Button, Container, Section, Separator } from "../components/ui";
 import { useDocumentTitle } from "../hooks";
 import { getProduct } from "../services";
 import { formatPrice } from "../lib/format-price";
 import { ApiError } from "../lib/api-error";
+import type { cartItemsAction } from "../lib/cart-items-action";
+import { useCurrentCart } from "../hooks/use-current-cart";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   try {
@@ -23,27 +28,13 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function ProductPage() {
   const { product } = useLoaderData<typeof loader>();
-
-  const { status: cartStatus, addItem } = useCart();
-
+  const fetcher = useFetcher<typeof cartItemsAction>();
+  const cartResult = useCurrentCart();
   useDocumentTitle(product?.title ?? "Cargando...");
-  const [isAdding, setIsAdding] = useState(false);
-  const [addError, setAddError] = useState<string | null>(null);
 
-  async function handleAddToCart() {
-    if (product === null) return;
-
-    setAddError(null);
-    setIsAdding(true);
-    try {
-      await addItem(product.id);
-    } catch (error) {
-      console.error(error);
-      setAddError("No pudimos agregar el producto. Intenta de nuevo.");
-    } finally {
-      setIsAdding(false);
-    }
-  }
+  const isAdding = fetcher.state !== "idle";
+  const error = isAdding ? undefined : fetcher.data?.error;
+  const isCartOk = cartResult.ok;
 
   return (
     <Section>
@@ -61,24 +52,27 @@ export default function ProductPage() {
           <p className="mb-10 text-sm text-muted-foreground">
             {product.description}
           </p>
-          <Button
-            type="button"
-            size="xl"
-            className="w-full md:w-80"
-            onClick={handleAddToCart}
-            disabled={isAdding || cartStatus !== "success"}
-          >
-            {isAdding ? "Agregando..." : "Agregar al Carrito"}
-          </Button>
-          {cartStatus === "error" && (
+          <fetcher.Form method="POST" action="/cart/items">
+            <input type="hidden" name="intent" value="add" />
+            <input type="hidden" name="productId" value={product.id} />
+            <Button
+              type="submit"
+              size="xl"
+              className="w-full md:w-80"
+              disabled={isAdding || !isCartOk}
+            >
+              {isAdding ? "Agregando..." : "Agregar al Carrito"}
+            </Button>
+          </fetcher.Form>
+          {!isCartOk && (
             <p className="mt-2 text-xs text-error" role="status">
               No pudimos cargar tu carrito. Recarga la página para agregar
               productos.
             </p>
           )}
-          {addError && (
+          {error && (
             <p className="mt-2 text-xs text-error" role="alert">
-              {addError}
+              {error}
             </p>
           )}
           <Separator className="my-6" />

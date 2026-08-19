@@ -1,5 +1,3 @@
-export type Status = "idle" | "loading" | "success" | "error";
-
 export type User = {
   id: number;
   email: string;
