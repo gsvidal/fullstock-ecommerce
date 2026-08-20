@@ -11,16 +11,8 @@ import {
 const ADD_ERROR = "No pudimos agregar el producto. Intenta de nuevo.";
 const UPDATE_ERROR = "No pudimos actualizar el carrito. Intenta de nuevo.";
 
-function parsePositiveInt(value: FormDataEntryValue | null): number | null {
-  if (typeof value !== "string") return null;
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed < 1) return null;
-  return parsed;
-}
-
 async function addItem(formData: FormData) {
-  const productId = parsePositiveInt(formData.get("productId"));
-  if (productId === null) return { error: ADD_ERROR };
+  const productId = Number(formData.get("productId"));
 
   const cart = await getCart();
   const existingItem = cart?.items.find(
@@ -49,19 +41,15 @@ async function addItem(formData: FormData) {
 }
 
 async function updateItem(formData: FormData) {
-  const itemId = parsePositiveInt(formData.get("itemId"));
-  const quantity = parsePositiveInt(formData.get("quantity"));
-  if (itemId === null || quantity === null) {
-    return { error: UPDATE_ERROR };
-  }
+  const itemId = Number(formData.get("itemId"));
+  const quantity = Number(formData.get("quantity"));
 
   await updateCartItem(itemId, quantity);
   return null;
 }
 
 async function removeItem(formData: FormData) {
-  const itemId = parsePositiveInt(formData.get("itemId"));
-  if (itemId === null) return { error: UPDATE_ERROR };
+  const itemId = Number(formData.get("itemId"));
 
   await removeCartItem(itemId);
   return null;

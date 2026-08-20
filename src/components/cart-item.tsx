@@ -14,6 +14,7 @@ export default function CartItem({ item }: CartItemProps) {
 
   const isPending = fetcher.state !== "idle";
   const error = isPending ? undefined : fetcher.data?.error;
+  const isLastUnit = item.quantity === 1;
 
   return (
     <div className="flex gap-6 border-b border-b-border p-6">
@@ -48,7 +49,7 @@ export default function CartItem({ item }: CartItemProps) {
           <div className="flex items-center gap-4">
             <fetcher.Form method="post" action="/cart/items">
               <input type="hidden" name="itemId" value={item.id} />
-              {item.quantity === 1 ? (
+              {isLastUnit ? (
                 <input type="hidden" name="intent" value="remove" />
               ) : (
                 <>
@@ -65,7 +66,7 @@ export default function CartItem({ item }: CartItemProps) {
                 variant="outline"
                 size="sm-icon"
                 aria-label={
-                  item.quantity === 1 ? "Eliminar artículo" : "Reducir cantidad"
+                  isLastUnit ? "Eliminar artículo" : "Reducir cantidad"
                 }
                 disabled={isPending}
               >
