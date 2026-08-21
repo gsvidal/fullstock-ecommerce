@@ -1,7 +1,6 @@
 import { Navigate, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCart } from "../../providers/cart-provider";
 import { useEffect } from "react";
 import {
   Button,
@@ -11,7 +10,6 @@ import {
   Section,
   SelectField,
   Separator,
-  Spinner,
 } from "../../components/ui";
 import { XIcon } from "../../components/ui/icons";
 import { useCurrentUser, useDocumentTitle } from "../../hooks";
@@ -25,10 +23,11 @@ import {
   type CheckoutFormInput,
 } from "../../schemas/checkout";
 import { COUNTRIES, SHIPPING_FIELDS } from "./fields";
+import { useCurrentCart } from "../../hooks/use-current-cart";
 
 export default function CheckoutPage() {
-  const { cart, status: cartStatus, refresh } = useCart();
   const user = useCurrentUser();
+  const cartResult = useCurrentCart();
   const navigate = useNavigate();
   useDocumentTitle("Checkout");
 
@@ -61,7 +60,7 @@ export default function CheckoutPage() {
     }
   }, [user?.email, setValue]);
 
-  if (cartStatus === "error") {
+  if (!cartResult.ok) {
     return (
       <MessageScreen
         title="Algo salió mal"
@@ -74,9 +73,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (cartStatus === "loading") {
-    return <Spinner />;
-  }
+  const cart = cartResult.cart;
 
   if (cart === null || cart.items.length === 0) {
     return <Navigate to="/cart" replace />;
@@ -86,7 +83,6 @@ export default function CheckoutPage() {
     try {
       const order = await createOrder(shippingInfo);
       navigate(`/order-confirmation?orderId=${order.id}`);
-      await refresh();
     } catch (error) {
       if (error instanceof ApiError && error.status === 422 && error.fields) {
         applyServerFieldErrors(error.fields, setError);

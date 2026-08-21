@@ -20,6 +20,7 @@ import RouteErrorBoundary from "./components/route-error-boundary";
 import { Spinner } from "./components/ui";
 import { guestOnlyLoader } from "./lib/guest-only-loader";
 import { logoutAction } from "./lib/logout-action";
+import { cartItemsAction } from "./lib/cart-items-action";
 
 export const router = createBrowserRouter([
   {
@@ -67,4 +68,5 @@ export const router = createBrowserRouter([
     ],
   },
   { path: "logout", action: logoutAction },
+  { path: "cart/items", action: cartItemsAction },
 ]);

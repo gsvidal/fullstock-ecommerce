@@ -1,50 +1,20 @@
-import { useState } from "react";
-import { useCart } from "../providers/cart-provider";
 import type { CartItem as CartItemType } from "../types";
 import { Button } from "./ui";
 import { formatPrice } from "../lib/format-price";
 import { MinusIcon, PlusIcon, TrashIcon } from "./ui/icons";
+import { useFetcher } from "react-router";
+import type { cartItemsAction } from "../lib/cart-items-action";
 
 type CartItemProps = {
   item: CartItemType;
 };
 
 export default function CartItem({ item }: CartItemProps) {
-  const { updateItem, removeItem } = useCart();
-  const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const fetcher = useFetcher<typeof cartItemsAction>();
 
-  // Cualquier acción sobre este item deshabilita sus tres botones mientras
-  // está en vuelo: evita dobles clics y carreras entre operaciones.
-  async function runAction(action: () => Promise<void>) {
-    setError(null); // limpia un error previo antes de reintentar
-    setIsPending(true);
-    try {
-      await action();
-    } catch (error) {
-      console.error(error);
-      setError("No pudimos actualizar el carrito. Intenta de nuevo.");
-    } finally {
-      setIsPending(false);
-    }
-  }
-
-  function handleIncrement() {
-    runAction(() => updateItem(item.id, item.quantity + 1));
-  }
-
-  function handleDecrement() {
-    // Reducir por debajo de 1 equivale a quitar el item del carrito.
-    if (item.quantity === 1) {
-      runAction(() => removeItem(item.id));
-    } else {
-      runAction(() => updateItem(item.id, item.quantity - 1));
-    }
-  }
-
-  function handleRemove() {
-    runAction(() => removeItem(item.id));
-  }
+  const isPending = fetcher.state !== "idle";
+  const error = isPending ? undefined : fetcher.data?.error;
+  const isLastUnit = item.quantity === 1;
 
   return (
     <div className="flex gap-6 border-b border-b-border p-6">
@@ -58,47 +28,68 @@ export default function CartItem({ item }: CartItemProps) {
       <div className="flex grow flex-col justify-between">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-sm">{item.product.title}</h2>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm-icon"
-            aria-label="Eliminar artículo"
-            onClick={handleRemove}
-            disabled={isPending}
-          >
-            <TrashIcon />
-          </Button>
+          <fetcher.Form method="post" action="/cart/items">
+            <input type="hidden" name="intent" value="remove" />
+            <input type="hidden" name="itemId" value={item.id} />
+            <Button
+              type="submit"
+              variant="outline"
+              size="sm-icon"
+              aria-label="Eliminar artículo"
+              disabled={isPending}
+            >
+              <TrashIcon />
+            </Button>
+          </fetcher.Form>
         </div>
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <p className="text-sm font-medium">
             {formatPrice(item.product.price)}
           </p>
           <div className="flex items-center gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm-icon"
-              aria-label={
-                item.quantity === 1 ? "Eliminar artículo" : "Reducir cantidad"
-              }
-              onClick={handleDecrement}
-              disabled={isPending}
-            >
-              <MinusIcon />
-            </Button>
+            <fetcher.Form method="post" action="/cart/items">
+              <input type="hidden" name="itemId" value={item.id} />
+              {isLastUnit ? (
+                <input type="hidden" name="intent" value="remove" />
+              ) : (
+                <>
+                  <input type="hidden" name="intent" value="update" />
+                  <input
+                    type="hidden"
+                    name="quantity"
+                    value={item.quantity - 1}
+                  />
+                </>
+              )}
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm-icon"
+                aria-label={
+                  isLastUnit ? "Eliminar artículo" : "Reducir cantidad"
+                }
+                disabled={isPending}
+              >
+                <MinusIcon />
+              </Button>
+            </fetcher.Form>
             <span className="flex size-8 items-center justify-center rounded-md border border-border px-4 py-2">
               {item.quantity}
             </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm-icon"
-              aria-label="Aumentar cantidad"
-              onClick={handleIncrement}
-              disabled={isPending}
-            >
-              <PlusIcon />
-            </Button>
+            <fetcher.Form method="post" action="/cart/items">
+              <input type="hidden" name="intent" value="update" />
+              <input type="hidden" name="itemId" value={item.id} />
+              <input type="hidden" name="quantity" value={item.quantity + 1} />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm-icon"
+                aria-label="Aumentar cantidad"
+                disabled={isPending}
+              >
+                <PlusIcon />
+              </Button>
+            </fetcher.Form>
           </div>
         </div>
         {error && (

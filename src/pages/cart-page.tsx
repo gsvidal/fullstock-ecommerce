@@ -1,20 +1,15 @@
-import { useCart } from "../providers/cart-provider";
 import CartItem from "../components/cart-item";
-import {
-  Button,
-  Container,
-  MessageScreen,
-  Section,
-  Spinner,
-} from "../components/ui";
+import { Button, Container, MessageScreen, Section } from "../components/ui";
 import { formatPrice } from "../lib/format-price";
 import { useDocumentTitle } from "../hooks";
+import { useCurrentCart } from "../hooks/use-current-cart";
 
 export default function CartPage() {
-  const { cart, status } = useCart();
+  const cartResult = useCurrentCart();
+
   useDocumentTitle("Carrito");
 
-  if (status === "error") {
+  if (!cartResult.ok) {
     return (
       <MessageScreen
         title="Algo salió mal"
@@ -27,10 +22,7 @@ export default function CartPage() {
     );
   }
 
-  if (status === "loading") {
-    return <Spinner />;
-  }
-
+  const cart = cartResult.cart;
   const items = cart?.items ?? [];
   const totalPrice = cart?.totalPrice ?? 0;
 
