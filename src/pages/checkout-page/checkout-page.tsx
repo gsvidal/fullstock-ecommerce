@@ -1,4 +1,12 @@
-import { Navigate, useNavigate } from "react-router";
+import {
+  data,
+  redirect,
+  useActionData,
+  useLoaderData,
+  useNavigation,
+  useSubmit,
+  type ActionFunctionArgs,
+} from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
@@ -6,7 +14,6 @@ import {
   Button,
   Container,
   InputField,
-  MessageScreen,
   Section,
   SelectField,
   Separator,
@@ -15,7 +22,7 @@ import { XIcon } from "../../components/ui/icons";
 import { useCurrentUser, useDocumentTitle } from "../../hooks";
 import { ApiError } from "../../lib/api-error";
 import { formatPrice } from "../../lib/format-price";
-import { createOrder } from "../../services";
+import { createOrder, getCart } from "../../services";
 import { applyServerFieldErrors } from "../../lib/apply-server-field-errors";
 import {
   checkoutSchema,
@@ -23,18 +30,70 @@ import {
   type CheckoutFormInput,
 } from "../../schemas/checkout";
 import { COUNTRIES, SHIPPING_FIELDS } from "./fields";
-import { useCurrentCart } from "../../hooks/use-current-cart";
+import z from "zod";
+import { logError } from "../../lib/log-error";
+
+export async function loader() {
+  try {
+    const cart = await getCart();
+
+    if (cart === null || cart.items.length === 0) {
+      return redirect("/cart");
+    }
+
+    return { cart };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw data(error.message, { status: error.status });
+    }
+
+    throw error;
+  }
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const parsed = checkoutSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return { fields: z.flattenError(parsed.error).fieldErrors };
+  }
+
+  try {
+    const order = await createOrder(parsed.data);
+
+    return redirect(`/order-confirmation?orderId=${order.id}`);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 422 && error.fields) {
+      return { fields: error.fields };
+    }
+    if (
+      error instanceof ApiError &&
+      (error.status === 400 || error.status === 404 || error.status === 409)
+    ) {
+      return redirect("/cart");
+    }
+
+    logError(error);
+
+    return { root: "No pudimos procesar tu orden. Intenta de nuevo." };
+  }
+}
 
 export default function CheckoutPage() {
   const user = useCurrentUser();
-  const cartResult = useCurrentCart();
-  const navigate = useNavigate();
+  const { cart } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
   useDocumentTitle("Checkout");
+  const submit = useSubmit();
+  const navigation = useNavigation();
+
+  const isSubmitting = navigation.state !== "idle";
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setError,
     setValue,
   } = useForm<CheckoutFormInput, unknown, CheckoutFormValues>({
@@ -60,41 +119,18 @@ export default function CheckoutPage() {
     }
   }, [user?.email, setValue]);
 
-  if (!cartResult.ok) {
-    return (
-      <MessageScreen
-        title="Algo salió mal"
-        description="No pudimos cargar los datos de tu compra."
-      >
-        <Button size="lg" onClick={() => window.location.reload()}>
-          Recargar la página
-        </Button>
-      </MessageScreen>
-    );
-  }
+  useEffect(() => {
+    if (actionData?.fields) applyServerFieldErrors(actionData.fields, setError);
+    if (actionData?.root) setError("root", { message: actionData.root });
+  }, [actionData, setError]);
 
-  const cart = cartResult.cart;
+  function onSubmit(
+    _values: CheckoutFormValues,
+    event?: React.BaseSyntheticEvent,
+  ) {
+    const form = event?.target;
 
-  if (cart === null || cart.items.length === 0) {
-    return <Navigate to="/cart" replace />;
-  }
-
-  async function onSubmit(shippingInfo: CheckoutFormValues) {
-    try {
-      const order = await createOrder(shippingInfo);
-      navigate(`/order-confirmation?orderId=${order.id}`);
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 422 && error.fields) {
-        applyServerFieldErrors(error.fields, setError);
-      } else if (error instanceof ApiError && error.status === 400) {
-        setError("root", { message: error.message });
-      } else {
-        console.error(error);
-        setError("root", {
-          message: "No pudimos procesar tu orden. Intenta de nuevo.",
-        });
-      }
-    }
+    submit(form, { method: "post", replace: true });
   }
 
   return (

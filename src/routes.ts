@@ -6,7 +6,10 @@ import CategoryPage, {
 import HomePage, { loader as homePageLoader } from "./pages/home-page";
 import ProductPage, { loader as productPageLoader } from "./pages/product-page";
 import CartPage from "./pages/cart-page";
-import CheckoutPage from "./pages/checkout-page";
+import CheckoutPage, {
+  loader as checkoutPageLoader,
+  action as checkoutPageAction,
+} from "./pages/checkout-page";
 import OrderConfirmationPage, {
   loader as orderConfirmationPageLoader,
 } from "./pages/order-confirmation-page";
@@ -46,7 +49,12 @@ export const router = createBrowserRouter([
             loader: productPageLoader,
           },
           { path: "cart", Component: CartPage },
-          { path: "checkout", Component: CheckoutPage },
+          {
+            path: "checkout",
+            Component: CheckoutPage,
+            loader: checkoutPageLoader,
+            action: checkoutPageAction,
+          },
           {
             path: "order-confirmation",
             Component: OrderConfirmationPage,
