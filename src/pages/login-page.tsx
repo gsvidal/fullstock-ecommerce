@@ -21,6 +21,7 @@ import { ApiError } from "../lib/api-error";
 import { applyServerFieldErrors } from "../lib/apply-server-field-errors";
 import { loginSchema, type LoginFormValues } from "../schemas/auth";
 import { createSession } from "../services";
+import { logError } from "../lib/log-error";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -37,7 +38,8 @@ export async function action({ request }: ActionFunctionArgs) {
     if (error instanceof ApiError && error.status === 401) {
       return { root: error.message };
     }
-    throw error;
+    logError(error);
+    return { root: "No pudimos completar la operación. Intenta de nuevo." };
   }
 }
 

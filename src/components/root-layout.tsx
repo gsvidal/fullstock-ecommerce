@@ -1,12 +1,18 @@
-import { Outlet, ScrollRestoration } from "react-router";
+import {
+  Outlet,
+  ScrollRestoration,
+  type ShouldRevalidateFunctionArgs,
+} from "react-router";
 import Footer from "./footer";
 import Header from "./header";
 import { getCart, getCurrentUser } from "../services";
+import ProgressBar from "./progress-bar";
+import { logError } from "../lib/log-error";
 
 export async function loader() {
   const [user, cartResult] = await Promise.all([
     getCurrentUser().catch((error) => {
-      console.error(error);
+      logError(error);
       return null;
     }),
     getCart()
@@ -15,7 +21,7 @@ export async function loader() {
         cart,
       }))
       .catch((error) => {
-        console.error(error);
+        logError(error);
         return { ok: false as const };
       }),
   ]);
@@ -23,11 +29,23 @@ export async function loader() {
   return { user, cartResult };
 }
 
+export function shouldRevalidate({
+  formMethod,
+  nextUrl,
+}: ShouldRevalidateFunctionArgs) {
+  if (formMethod != null && formMethod.toUpperCase() !== "GET") return true;
+
+  return nextUrl.pathname === "/cart" || nextUrl.pathname === "/checkout";
+}
+
 export default function RootLayout() {
   return (
     <div className="grid min-h-dvh grid-rows-[auto_1fr_auto]">
       <ScrollRestoration />
-      <Header className="sticky top-0 z-50 border-b border-b-border bg-background" />
+      <div className="sticky top-0 z-50">
+        <Header className="border-b border-b-border bg-background" />
+        <ProgressBar />
+      </div>
       <main>
         <Outlet />
       </main>

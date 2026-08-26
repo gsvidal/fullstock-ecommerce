@@ -1,4 +1,4 @@
-import { useCurrentCart } from "../hooks/use-current-cart";
+import { useCurrentCart } from "../hooks";
 import ThemeToggler from "./theme-toggler";
 import { Button } from "./ui";
 import { CartIcon } from "./ui/icons";

@@ -20,6 +20,7 @@ import { applyServerFieldErrors } from "../lib/apply-server-field-errors";
 import { signupSchema, type SignupFormValues } from "../schemas/auth";
 import { createUser } from "../services";
 import { useEffect } from "react";
+import { logError } from "../lib/log-error";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -39,7 +40,8 @@ export async function action({ request }: ActionFunctionArgs) {
     if (error instanceof ApiError && error.status === 401) {
       return { root: error.message };
     }
-    throw error;
+    logError(error);
+    return { root: "No pudimos completar la operación. Intenta de nuevo." };
   }
 }
 

@@ -1,5 +1,8 @@
-import { createBrowserRouter } from "react-router";
-import RootLayout, { loader as rootLoader } from "./components/root-layout";
+import { createBrowserRouter, redirect } from "react-router";
+import RootLayout, {
+  loader as rootLoader,
+  shouldRevalidate as rootShouldRevalidate,
+} from "./components/root-layout";
 import CategoryPage, {
   loader as categoryPageLoader,
 } from "./pages/category-page";
@@ -31,11 +34,11 @@ export const router = createBrowserRouter([
     Component: RootLayout,
     loader: rootLoader,
     HydrateFallback: Spinner,
-    // TODO: Definir si debemos incluir un ErrorBoundary aquí.
+    ErrorBoundary: RouteErrorBoundary,
+    shouldRevalidate: rootShouldRevalidate,
     children: [
       {
         ErrorBoundary: RouteErrorBoundary,
-        HydrateFallback: Spinner,
         children: [
           { index: true, Component: HomePage, loader: homePageLoader },
           {
@@ -75,6 +78,10 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  { path: "logout", action: logoutAction },
-  { path: "cart/items", action: cartItemsAction },
+  { path: "logout", loader: () => redirect("/"), action: logoutAction },
+  {
+    path: "cart/items",
+    loader: () => redirect("/cart"),
+    action: cartItemsAction,
+  },
 ]);

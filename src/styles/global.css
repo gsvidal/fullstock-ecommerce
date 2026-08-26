@@ -95,3 +95,17 @@ textarea {
 * {
   border-color: var(--color-border);
 }
+
+@keyframes progress-bar {
+  0% {
+    width: 0%;
+  }
+
+  5% {
+    width: 20%;
+  }
+
+  100% {
+    width: 80%;
+  }
+}

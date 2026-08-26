@@ -1,12 +1,12 @@
 import CartItem from "../components/cart-item";
 import { Button, Container, MessageScreen, Section } from "../components/ui";
 import { formatPrice } from "../lib/format-price";
-import { useDocumentTitle } from "../hooks";
-import { useCurrentCart } from "../hooks/use-current-cart";
+import { useDocumentTitle, useCurrentCart } from "../hooks";
+import { useRevalidator } from "react-router";
 
 export default function CartPage() {
   const cartResult = useCurrentCart();
-
+  const revalidator = useRevalidator();
   useDocumentTitle("Carrito");
 
   if (!cartResult.ok) {
@@ -15,7 +15,7 @@ export default function CartPage() {
         title="Algo salió mal"
         description="No pudimos cargar tu carrito."
       >
-        <Button size="lg" onClick={() => window.location.reload()}>
+        <Button size="lg" onClick={() => revalidator.revalidate()}>
           Recargar la página
         </Button>
       </MessageScreen>

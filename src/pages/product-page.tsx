@@ -5,12 +5,11 @@ import {
   useFetcher,
 } from "react-router";
 import { Button, Container, Section, Separator } from "../components/ui";
-import { useDocumentTitle } from "../hooks";
 import { getProduct } from "../services";
 import { formatPrice } from "../lib/format-price";
 import { ApiError } from "../lib/api-error";
 import type { cartItemsAction } from "../lib/cart-items-action";
-import { useCurrentCart } from "../hooks/use-current-cart";
+import { useDocumentTitle, useCurrentCart } from "../hooks";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   try {
@@ -30,7 +29,7 @@ export default function ProductPage() {
   const { product } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof cartItemsAction>();
   const cartResult = useCurrentCart();
-  useDocumentTitle(product?.title ?? "Cargando...");
+  useDocumentTitle(product.title);
 
   const isAdding = fetcher.state !== "idle";
   const error = isAdding ? undefined : fetcher.data?.error;
