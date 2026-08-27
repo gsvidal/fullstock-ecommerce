@@ -6,7 +6,7 @@ export default function ProgressBar() {
 
   return (
     <div
-      className={`relative z-10 -mb-1 h-1 bg-primary-background ${
+      className={`absolute top-0 z-50 h-1 bg-primary-background ${
         idle
           ? "w-full opacity-0 transition-[width,opacity] duration-250"
           : "w-0 animate-[progress-bar_8s_ease-out_forwards] opacity-100 transition-none"
