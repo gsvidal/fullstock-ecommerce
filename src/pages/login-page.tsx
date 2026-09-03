@@ -16,21 +16,23 @@ import {
   PasswordField,
   Section,
 } from "../components/ui";
-import { useDocumentTitle } from "../hooks";
 import { ApiError } from "../lib/api-error";
 import { applyServerFieldErrors } from "../lib/apply-server-field-errors";
 import { loginSchema, type LoginFormValues } from "../schemas/auth";
 import { createSession } from "../services";
 import { logError } from "../lib/log-error";
+import { apiCookies, setCookieHeaders } from "../lib/api-cookies";
+import { pageTitle } from "../lib/page-meta";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = String(formData.get("email"));
   const password = String(formData.get("password"));
+  const cookies = apiCookies(request);
 
   try {
-    await createSession(email, password);
-    return replace("/");
+    await createSession(email, password, cookies);
+    return replace("/", { headers: setCookieHeaders(cookies) });
   } catch (error) {
     if (error instanceof ApiError && error.status === 422 && error.fields) {
       return { fields: error.fields };
@@ -43,10 +45,13 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
+export function meta() {
+  return [pageTitle("Iniciar sesión")];
+}
+
 export default function LoginPage() {
   const submit = useSubmit();
   const actionData = useActionData<typeof action>();
-  useDocumentTitle("Iniciar sesión");
 
   const {
     register,

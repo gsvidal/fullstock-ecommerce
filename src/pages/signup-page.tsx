@@ -14,22 +14,24 @@ import {
   PasswordField,
   Section,
 } from "../components/ui";
-import { useDocumentTitle } from "../hooks";
 import { ApiError } from "../lib/api-error";
 import { applyServerFieldErrors } from "../lib/apply-server-field-errors";
 import { signupSchema, type SignupFormValues } from "../schemas/auth";
 import { createUser } from "../services";
 import { useEffect } from "react";
 import { logError } from "../lib/log-error";
+import { apiCookies, setCookieHeaders } from "../lib/api-cookies";
+import { pageTitle } from "../lib/page-meta";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = String(formData.get("email"));
   const password = String(formData.get("password"));
+  const cookies = apiCookies(request);
 
   try {
-    await createUser(email, password);
-    return replace("/");
+    await createUser(email, password, cookies);
+    return replace("/", { headers: setCookieHeaders(cookies) });
   } catch (error) {
     if (error instanceof ApiError && error.status === 422 && error.fields) {
       return { fields: error.fields };
@@ -45,11 +47,13 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
+export function meta() {
+  return [pageTitle("Crear cuenta")];
+}
+
 export default function SignupPage() {
   const submit = useSubmit();
   const actionData = useActionData<typeof action>();
-
-  useDocumentTitle("Crear cuenta");
 
   const {
     register,

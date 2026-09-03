@@ -1,9 +1,11 @@
 import { Prose, Section } from "../../components/ui";
-import { useDocumentTitle } from "../../hooks";
+import { pageTitle } from "../../lib/page-meta";
+
+export function meta() {
+  return [pageTitle("Términos y condiciones")];
+}
 
 export default function TermsPage() {
-  useDocumentTitle("Términos y condiciones");
-
   return (
     <Section>
       <Prose>

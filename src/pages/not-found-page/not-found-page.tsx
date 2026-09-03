@@ -1,9 +1,14 @@
 import { Button, MessageScreen } from "../../components/ui";
-import { useDocumentTitle } from "../../hooks";
+
+export function meta() {
+  return [
+    {
+      title: "Página no encontrada",
+    },
+  ];
+}
 
 export default function NotFoundPage() {
-  useDocumentTitle("Página no encontrada");
-
   return (
     <MessageScreen
       title="Página no encontrada"

@@ -8,8 +8,10 @@ import { Button, Container, Section, Separator } from "../components/ui";
 import { getProduct } from "../services";
 import { formatPrice } from "../lib/format-price";
 import { ApiError } from "../lib/api-error";
-import type { cartItemsAction } from "../lib/cart-items-action";
-import { useDocumentTitle, useCurrentCart } from "../hooks";
+import type { action as cartItemsAction } from "../routes/cart-items";
+import { useCurrentCart } from "../hooks";
+import { pageTitle } from "../lib/page-meta";
+import type { Route } from "./+types/product-page";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   try {
@@ -25,11 +27,14 @@ export async function loader({ params }: LoaderFunctionArgs) {
   }
 }
 
+export function meta({ loaderData }: Route.MetaArgs) {
+  return [pageTitle(loaderData.product.title)];
+}
+
 export default function ProductPage() {
   const { product } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof cartItemsAction>();
   const cartResult = useCurrentCart();
-  useDocumentTitle(product.title);
 
   const isAdding = fetcher.state !== "idle";
   const error = isAdding ? undefined : fetcher.data?.error;

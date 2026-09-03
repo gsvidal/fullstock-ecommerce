@@ -1,16 +1,11 @@
-import {
-  useLoaderData,
-  data,
-  type LoaderFunctionArgs,
-  useSearchParams,
-  useParams,
-} from "react-router";
+import { data, useSearchParams } from "react-router";
 import PriceFilter from "../components/price-filter";
 import ProductCard from "../components/product-card";
 import { Container, Section } from "../components/ui";
-import { useDocumentTitle } from "../hooks";
 import { ApiError } from "../lib/api-error";
 import { getCategory, getCategoryProducts } from "../services";
+import { pageTitle } from "../lib/page-meta";
+import type { Route } from "./+types/category-page";
 
 function parsePrice(value: string | null): number | undefined {
   if (value === null || value.trim() === "") return undefined;
@@ -18,7 +13,7 @@ function parsePrice(value: string | null): number | undefined {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
   const { slug } = params;
 
   const url = new URL(request.url);
@@ -35,8 +30,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   try {
     const [category, products] = await Promise.all([
-      getCategory(slug!),
-      getCategoryProducts(slug!, { minPrice, maxPrice }),
+      getCategory(slug),
+      getCategoryProducts(slug, { minPrice, maxPrice }),
     ]);
     return { category, products };
   } catch (error) {
@@ -47,12 +42,17 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   }
 }
 
-export default function CategoryPage() {
-  const { category, products } = useLoaderData<typeof loader>();
-  const [searchParams] = useSearchParams();
-  const { slug } = useParams();
+export function meta({ loaderData }: Route.MetaArgs) {
+  return [pageTitle(loaderData.category.title)];
+}
 
-  useDocumentTitle(category.title);
+export default function CategoryPage({
+  loaderData,
+  params,
+}: Route.ComponentProps) {
+  const [searchParams] = useSearchParams();
+  const { category, products } = loaderData;
+  const { slug } = params;
 
   return (
     <>

@@ -3,7 +3,7 @@ import { Button } from "./ui";
 import { formatPrice } from "../lib/format-price";
 import { MinusIcon, PlusIcon, TrashIcon } from "./ui/icons";
 import { useFetcher } from "react-router";
-import type { cartItemsAction } from "../lib/cart-items-action";
+import type { action as cartItemsAction } from "../routes/cart-items";
 
 type CartItemProps = {
   item: CartItemType;

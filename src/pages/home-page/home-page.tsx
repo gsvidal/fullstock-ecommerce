@@ -2,9 +2,9 @@ import { data, useLoaderData } from "react-router";
 import Categories from "../../components/categories";
 import Features from "../../components/features";
 import Hero from "../../components/hero";
-import { useDocumentTitle } from "../../hooks";
 import { getCategories } from "../../services";
 import { ApiError } from "../../lib/api-error";
+import { pageTitle } from "../../lib/page-meta";
 
 export async function loader() {
   try {
@@ -18,9 +18,12 @@ export async function loader() {
   }
 }
 
+export function meta() {
+  return [pageTitle("Inicio")];
+}
+
 export default function HomePage() {
   const { categories } = useLoaderData<typeof loader>();
-  useDocumentTitle("Inicio");
 
   return (
     <>

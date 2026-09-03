@@ -6,6 +6,7 @@ import {
   useNavigation,
   useSubmit,
   type ActionFunctionArgs,
+  type LoaderFunctionArgs,
 } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +20,7 @@ import {
   Separator,
 } from "../../components/ui";
 import { XIcon } from "../../components/ui/icons";
-import { useCurrentUser, useDocumentTitle } from "../../hooks";
+import { useCurrentUser } from "../../hooks";
 import { ApiError } from "../../lib/api-error";
 import { formatPrice } from "../../lib/format-price";
 import { createOrder, getCart } from "../../services";
@@ -32,10 +33,13 @@ import {
 import { COUNTRIES, SHIPPING_FIELDS } from "./fields";
 import z from "zod";
 import { logError } from "../../lib/log-error";
+import { apiCookies, setCookieHeaders } from "../../lib/api-cookies";
+import { pageTitle } from "../../lib/page-meta";
 
-export async function loader() {
+export async function loader({ request }: LoaderFunctionArgs) {
   try {
-    const cart = await getCart();
+    const cookies = apiCookies(request);
+    const cart = await getCart(cookies);
 
     if (cart === null || cart.items.length === 0) {
       return redirect("/cart");
@@ -59,10 +63,14 @@ export async function action({ request }: ActionFunctionArgs) {
     return { fields: z.flattenError(parsed.error).fieldErrors };
   }
 
-  try {
-    const order = await createOrder(parsed.data);
+  const cookies = apiCookies(request);
 
-    return redirect(`/order-confirmation?orderId=${order.id}`);
+  try {
+    const order = await createOrder(parsed.data, cookies);
+
+    return redirect(`/order-confirmation?orderId=${order.id}`, {
+      headers: setCookieHeaders(cookies),
+    });
   } catch (error) {
     if (error instanceof ApiError && error.status === 422 && error.fields) {
       return { fields: error.fields };
@@ -80,11 +88,14 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
+export function meta() {
+  return [pageTitle("Checkout")];
+}
+
 export default function CheckoutPage() {
   const user = useCurrentUser();
   const { cart } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  useDocumentTitle("Checkout");
   const submit = useSubmit();
   const navigation = useNavigation();
 

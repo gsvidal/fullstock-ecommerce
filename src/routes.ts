@@ -1,87 +1,27 @@
-import { createBrowserRouter, redirect } from "react-router";
-import RootLayout, {
-  loader as rootLoader,
-  shouldRevalidate as rootShouldRevalidate,
-} from "./components/root-layout";
-import CategoryPage, {
-  loader as categoryPageLoader,
-} from "./pages/category-page";
-import HomePage, { loader as homePageLoader } from "./pages/home-page";
-import ProductPage, { loader as productPageLoader } from "./pages/product-page";
-import CartPage from "./pages/cart-page";
-import CheckoutPage, {
-  loader as checkoutPageLoader,
-  action as checkoutPageAction,
-} from "./pages/checkout-page";
-import OrderConfirmationPage, {
-  loader as orderConfirmationPageLoader,
-} from "./pages/order-confirmation-page";
-import AboutPage from "./pages/about-page";
-import TermsPage from "./pages/terms-page";
-import PrivacyPage from "./pages/privacy-page";
-import LoginPage, { action as loginAction } from "./pages/login-page";
-import SignupPage, { action as signupAction } from "./pages/signup-page";
-import NotFoundPage from "./pages/not-found-page";
-import RouteErrorBoundary from "./components/route-error-boundary";
-import { Spinner } from "./components/ui";
-import { guestOnlyLoader } from "./lib/guest-only-loader";
-import { logoutAction } from "./lib/logout-action";
-import { cartItemsAction } from "./lib/cart-items-action";
+import {
+  index,
+  layout,
+  route,
+  type RouteConfig,
+} from "@react-router/dev/routes";
 
-export const router = createBrowserRouter([
-  {
-    id: "root",
-    Component: RootLayout,
-    loader: rootLoader,
-    HydrateFallback: Spinner,
-    ErrorBoundary: RouteErrorBoundary,
-    shouldRevalidate: rootShouldRevalidate,
-    children: [
-      {
-        ErrorBoundary: RouteErrorBoundary,
-        children: [
-          { index: true, Component: HomePage, loader: homePageLoader },
-          {
-            path: "categories/:slug",
-            Component: CategoryPage,
-            loader: categoryPageLoader,
-          },
-          {
-            path: "products/:slug",
-            Component: ProductPage,
-            loader: productPageLoader,
-          },
-          { path: "cart", Component: CartPage },
-          {
-            path: "checkout",
-            Component: CheckoutPage,
-            loader: checkoutPageLoader,
-            action: checkoutPageAction,
-          },
-          {
-            path: "order-confirmation",
-            Component: OrderConfirmationPage,
-            loader: orderConfirmationPageLoader,
-          },
-          { path: "about", Component: AboutPage },
-          { path: "terms", Component: TermsPage },
-          { path: "privacy", Component: PrivacyPage },
-          {
-            loader: guestOnlyLoader,
-            children: [
-              { path: "login", Component: LoginPage, action: loginAction },
-              { path: "signup", Component: SignupPage, action: signupAction },
-            ],
-          },
-          { path: "*", Component: NotFoundPage },
-        ],
-      },
-    ],
-  },
-  { path: "logout", loader: () => redirect("/"), action: logoutAction },
-  {
-    path: "cart/items",
-    loader: () => redirect("/cart"),
-    action: cartItemsAction,
-  },
-]);
+const routes: RouteConfig = [
+  index("./pages/home-page/home-page.tsx"),
+  route("categories/:slug", "./pages/category-page.tsx"),
+  route("products/:slug", "./pages/product-page.tsx"),
+  route("cart", "./pages/cart-page.tsx"),
+  route("cart/items", "./routes/cart-items.ts"),
+  route("checkout", "./pages/checkout-page/checkout-page.tsx"),
+  route("order-confirmation", "./pages/order-confirmation-page.tsx"),
+  route("about", "./pages/about-page/about-page.tsx"),
+  route("terms", "./pages/terms-page/terms-page.tsx"),
+  route("privacy", "./pages/privacy-page/privacy-page.tsx"),
+  layout("./routes/guest-layout.tsx", [
+    route("login", "./pages/login-page.tsx"),
+    route("signup", "./pages/signup-page.tsx"),
+  ]),
+  route("logout", "./routes/logout.ts"),
+  route("*", "./pages/not-found-page/not-found-page.tsx"),
+];
+
+export default routes;

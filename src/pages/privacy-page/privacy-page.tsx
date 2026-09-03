@@ -1,9 +1,11 @@
 import { Prose, Section } from "../../components/ui";
-import { useDocumentTitle } from "../../hooks";
+import { pageTitle } from "../../lib/page-meta";
+
+export function meta() {
+  return [pageTitle("Privacidad")];
+}
 
 export default function PrivacyPage() {
-  useDocumentTitle("Privacidad");
-
   return (
     <Section>
       <Prose>

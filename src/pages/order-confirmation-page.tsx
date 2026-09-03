@@ -5,14 +5,15 @@ import {
   type LoaderFunctionArgs,
 } from "react-router";
 import { Container, Section } from "../components/ui";
-import { useDocumentTitle } from "../hooks";
 import { getOrder } from "../services";
 import { celebrate } from "../lib/confetti-celebration";
 import { ApiError } from "../lib/api-error";
 import { useEffect } from "react";
 import { idSchema } from "../schemas/shared";
+import { apiCookies } from "../lib/api-cookies";
+import { pageTitle } from "../lib/page-meta";
 
-export async function loader({ url }: LoaderFunctionArgs) {
+export async function loader({ url, request }: LoaderFunctionArgs) {
   const { success, data: orderId } = idSchema.safeParse(
     url.searchParams.get("orderId"),
   );
@@ -22,7 +23,8 @@ export async function loader({ url }: LoaderFunctionArgs) {
   }
 
   try {
-    const order = await getOrder(orderId);
+    const cookies = apiCookies(request);
+    const order = await getOrder(orderId, cookies);
     return { order };
   } catch (error) {
     if (error instanceof ApiError) {
@@ -32,9 +34,12 @@ export async function loader({ url }: LoaderFunctionArgs) {
   }
 }
 
+export function meta() {
+  return [pageTitle("Orden confirmada")];
+}
+
 export default function OrderConfirmationPage() {
   const { order } = useLoaderData<typeof loader>();
-  useDocumentTitle("Orden confirmada");
 
   useEffect(() => celebrate(), []);
 

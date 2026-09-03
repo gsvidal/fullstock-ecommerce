@@ -1,7 +1,7 @@
 import { Link, useFetcher } from "react-router";
 import { useCurrentUser } from "../hooks";
 import { Button, Container } from "./ui";
-import type { logoutAction } from "../lib/logout-action";
+import type { action as logoutAction } from "../routes/logout";
 
 export default function AuthNav() {
   const fetcher = useFetcher<typeof logoutAction>();

@@ -1,13 +1,20 @@
 import CartItem from "../components/cart-item";
 import { Button, Container, MessageScreen, Section } from "../components/ui";
 import { formatPrice } from "../lib/format-price";
-import { useDocumentTitle, useCurrentCart } from "../hooks";
+import { useCurrentCart } from "../hooks";
 import { useRevalidator } from "react-router";
+
+export function meta() {
+  return [
+    {
+      title: "Carrito",
+    },
+  ];
+}
 
 export default function CartPage() {
   const cartResult = useCurrentCart();
   const revalidator = useRevalidator();
-  useDocumentTitle("Carrito");
 
   if (!cartResult.ok) {
     return (

@@ -1,5 +1,5 @@
 import { useRouteLoaderData } from "react-router";
-import { loader as rootLoader } from "../components/root-layout";
+import type { loader as rootLoader } from "../root";
 
 export const useCurrentCart = () => {
   const { cartResult } = useRouteLoaderData<typeof rootLoader>("root")!;
