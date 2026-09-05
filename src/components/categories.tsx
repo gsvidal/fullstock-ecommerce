@@ -1,4 +1,4 @@
-import { type Category as CategoryType } from "../types";
+import type { Category as CategoryType } from "../repositories/category.repository";
 import Category from "./category";
 import { Container } from "./ui";
 

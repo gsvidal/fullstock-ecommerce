@@ -2,8 +2,8 @@ import { data, useSearchParams } from "react-router";
 import PriceFilter from "../components/price-filter";
 import ProductCard from "../components/product-card";
 import { Container, Section } from "../components/ui";
-import { ApiError } from "../lib/api-error";
-import { getCategory, getCategoryProducts } from "../services";
+import { getCategory } from "../services/category.service";
+import { getProductsByCategory } from "../services/product.service";
 import { pageTitle } from "../lib/page-meta";
 import type { Route } from "./+types/category-page";
 
@@ -28,18 +28,15 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const maxPrice =
     maxPriceSoles !== undefined ? Math.round(maxPriceSoles * 100) : undefined;
 
-  try {
-    const [category, products] = await Promise.all([
-      getCategory(slug),
-      getCategoryProducts(slug, { minPrice, maxPrice }),
-    ]);
-    return { category, products };
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw data(error.message, { status: error.status });
-    }
-    throw error;
+  const [category, products] = await Promise.all([
+    getCategory(slug),
+    getProductsByCategory(slug, { minPrice, maxPrice }),
+  ]);
+
+  if (!category) {
+    throw data("Categoría no encontrada", { status: 404 });
   }
+  return { category, products };
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import type { Product } from "../types";
+import type { Product } from "../repositories/product.repository";
 import { formatPrice } from "../lib/format-price";
 
 type ProductCardProps = {

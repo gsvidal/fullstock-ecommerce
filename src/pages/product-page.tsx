@@ -1,38 +1,28 @@
-import {
-  useLoaderData,
-  data,
-  type LoaderFunctionArgs,
-  useFetcher,
-} from "react-router";
+import { data, useFetcher } from "react-router";
 import { Button, Container, Section, Separator } from "../components/ui";
-import { getProduct } from "../services";
+import { getProduct } from "../services/product.service";
 import { formatPrice } from "../lib/format-price";
-import { ApiError } from "../lib/api-error";
 import type { action as cartItemsAction } from "../routes/cart-items";
 import { useCurrentCart } from "../hooks";
 import { pageTitle } from "../lib/page-meta";
 import type { Route } from "./+types/product-page";
 
-export async function loader({ params }: LoaderFunctionArgs) {
-  try {
-    const { slug } = params;
-    const product = await getProduct(slug!);
-    return { product };
-  } catch (error) {
-    // Que el producto no exista no es un fallo de la app: es una URL equivocada.
-    if (error instanceof ApiError) {
-      throw data(error.message, { status: error.status });
-    }
-    throw error;
+export async function loader({ params }: Route.LoaderArgs) {
+  const { slug } = params;
+  const product = await getProduct(slug);
+
+  if (!product) {
+    throw data("Producto no encontrado", { status: 404 });
   }
+  return { product };
 }
 
 export function meta({ loaderData }: Route.MetaArgs) {
   return [pageTitle(loaderData.product.title)];
 }
 
-export default function ProductPage() {
-  const { product } = useLoaderData<typeof loader>();
+export default function ProductPage({ loaderData }: Route.ComponentProps) {
+  const { product } = loaderData;
   const fetcher = useFetcher<typeof cartItemsAction>();
   const cartResult = useCurrentCart();
 

@@ -1,18 +1,11 @@
 import { isRouteErrorResponse, useRouteError } from "react-router";
 import ErrorFallback from "./error-fallback";
 import { Button, MessageScreen } from "./ui";
-
-const STATUS_TITLES: Record<number, string> = {
-  400: "Solicitud inválida",
-  401: "Inicia sesión para continuar",
-  403: "No tienes acceso",
-  404: "Página no encontrada",
-  409: "No pudimos completar la operación",
-};
-
-const DEFAULT_TITLE = "Algo salió mal";
-const DEFAULT_DESCRIPTION =
-  "No pudimos completar tu solicitud. Intenta de nuevo.";
+import {
+  STATUS_TITLES,
+  DEFAULT_TITLE,
+  DEFAULT_DESCRIPTION,
+} from "../lib/error";
 
 export default function RouteErrorBoundary() {
   const error = useRouteError();

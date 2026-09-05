@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { type Category as CategoryType } from "../types";
+import type { Category as CategoryType } from "../repositories/category.repository";
 
 type CategoryProps = {
   category: CategoryType;
