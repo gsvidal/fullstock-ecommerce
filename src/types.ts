@@ -1,10 +1,3 @@
-export type User = {
-  id: number;
-  email: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export type CartItem = {
   id: number;
   quantity: number;

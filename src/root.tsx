@@ -10,12 +10,14 @@ import {
 import Header from "./components/header";
 import ProgressBar from "./components/progress-bar";
 import Footer from "./components/footer";
-import { getCart, getCurrentUser } from "./services";
+import { getCart } from "./services";
+import { getUserById } from "./services/user.service";
 import { logError } from "./lib/log-error";
 import type { ReactNode } from "react";
 import { Spinner } from "./components/ui";
 import RouteErrorBoundary from "./components/route-error-boundary";
 import "./styles/index.css";
+import { getSession } from "./lib/session.server";
 import { apiCookies } from "./lib/api-cookies";
 
 // Aplica el tema antes de que React monte, para evitar el parpadeo (FOUC).
@@ -31,13 +33,18 @@ const THEME_SCRIPT = `(function () {
   }
 })();`;
 
+async function getCurrentUser(request: Request) {
+  const session = await getSession(request);
+  const userId = session.get("userId");
+  if (userId === undefined) return null;
+
+  return getUserById(userId);
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookies = apiCookies(request);
   const [user, cartResult] = await Promise.all([
-    getCurrentUser(cookies).catch((error) => {
-      logError(error);
-      return null;
-    }),
+    getCurrentUser(request),
     getCart(cookies)
       .then((cart) => ({
         ok: true as const,

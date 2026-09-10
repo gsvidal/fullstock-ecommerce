@@ -1,7 +1,5 @@
 import * as z from "zod";
 
-console.log("Evaluar environment variables");
-
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   SESSION_SECRET: z.string().min(1),
