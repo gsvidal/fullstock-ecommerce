@@ -1,105 +1,120 @@
-import { data, redirect } from "react-router";
+import { data, redirect, type ActionFunctionArgs } from "react-router";
+import { logError } from "../lib/log-error";
+import {
+  commitSession,
+  getSession,
+  type AppSession,
+} from "../lib/session.server";
+import * as cartService from "../services/cart.service";
+import * as cartItemService from "../services/cart-item.service";
+import {
+  createCartItemBodySchema,
+  updateCartItemBodySchema,
+  removeCartItemBodySchema,
+} from "../schemas/cart-item";
+
+const ADD_ERROR = "No pudimos agregar el producto. Intenta de nuevo.";
+const UPDATE_ERROR = "No pudimos actualizar el carrito. Intenta de nuevo.";
 
 export function loader() {
   return redirect("/cart");
 }
 
-import type { ActionFunctionArgs } from "react-router";
-import {
-  addCartItem,
-  getCart,
-  removeCartItem,
-  updateCartItem,
-} from "../services";
-import { ApiError } from "../lib/api-error";
-import { logError } from "../lib/log-error";
-import {
-  apiCookies,
-  setCookieHeaders,
-  type ApiCookies,
-} from "../lib/api-cookies";
+async function requireCart(session: AppSession) {
+  const cartId = session.get("cartId");
+  const cart = cartId === undefined ? null : await cartService.getCart(cartId);
 
-const ADD_ERROR = "No pudimos agregar el producto. Intenta de nuevo.";
-const UPDATE_ERROR = "No pudimos actualizar el carrito. Intenta de nuevo.";
+  if (cart === null) {
+    session.unset("cartId");
 
-async function addItem(formData: FormData, cookies: ApiCookies) {
-  const productId = Number(formData.get("productId"));
-
-  const cart = await getCart(cookies);
-  const existingItem = cart?.items.find(
-    (item) => item.product.id === productId,
-  );
-
-  if (existingItem) {
-    await updateCartItem(existingItem.id, existingItem.quantity + 1, cookies);
-    return null;
+    throw redirect("/cart", {
+      headers: { "Set-Cookie": await commitSession(session) },
+    });
   }
 
-  try {
-    await addCartItem(productId, 1, cookies);
-  } catch (error) {
-    if (!(error instanceof ApiError) || error.status !== 409) throw error;
-
-    const latestCart = await getCart(cookies);
-    const item = latestCart?.items.find(
-      (item) => item.product.id === productId,
-    );
-    if (!item) throw error;
-    await updateCartItem(item.id, item.quantity + 1, cookies);
-  }
-
-  return null;
-}
-
-async function updateItem(formData: FormData, cookies: ApiCookies) {
-  const itemId = Number(formData.get("itemId"));
-  const quantity = Number(formData.get("quantity"));
-
-  await updateCartItem(itemId, quantity, cookies);
-  return null;
-}
-
-async function removeItem(formData: FormData, cookies: ApiCookies) {
-  const itemId = Number(formData.get("itemId"));
-
-  await removeCartItem(itemId, cookies);
-  return null;
+  return cart;
 }
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
-  const cookies = apiCookies(request);
+  const session = await getSession(request);
+  const initialCartId = session.get("cartId");
+
+  async function sessionHeaders() {
+    if (session.get("cartId") === initialCartId) return undefined;
+
+    return { "Set-Cookie": await commitSession(session) };
+  }
 
   try {
     switch (intent) {
-      case "add":
-        return data(await addItem(formData, cookies), {
-          headers: setCookieHeaders(cookies),
-        });
-      case "update":
-        return data(await updateItem(formData, cookies), {
-          headers: setCookieHeaders(cookies),
-        });
-      case "remove":
-        return data(await removeItem(formData, cookies), {
-          headers: setCookieHeaders(cookies),
-        });
-      default:
-        return data(
-          { error: UPDATE_ERROR },
-          {
-            headers: setCookieHeaders(cookies),
-          },
+      case "add": {
+        const { productId, quantity } = createCartItemBodySchema.parse(
+          Object.fromEntries(formData),
         );
+
+        const existingCart =
+          initialCartId === undefined
+            ? null
+            : await cartService.getCart(initialCartId);
+
+        const cart =
+          existingCart ?? (await cartService.createCart(session.get("userId")));
+
+        if (existingCart === null) session.set("cartId", cart.id);
+
+        await cartItemService.addProductToCart(cart.id, {
+          productId,
+          quantity,
+        });
+
+        return data(null, { headers: await sessionHeaders() });
+      }
+
+      case "update": {
+        const cart = await requireCart(session);
+        const { itemId, quantity } = updateCartItemBodySchema.parse(
+          Object.fromEntries(formData),
+        );
+
+        const item = await cartItemService.updateCartItemQuantity(
+          cart.id,
+          itemId,
+          quantity,
+        );
+
+        if (item === null) throw redirect("/cart");
+
+        return data(null);
+      }
+
+      case "remove": {
+        const cart = await requireCart(session);
+        const { itemId } = removeCartItemBodySchema.parse(
+          Object.fromEntries(formData),
+        );
+
+        const removed = await cartItemService.deleteCartItem(cart.id, itemId);
+
+        if (!removed) throw redirect("/cart");
+
+        return data(null);
+      }
+
+      default:
+        logError(new Error(`Intent desconocido: ${String(intent)}`));
+
+        return data({ error: UPDATE_ERROR });
     }
   } catch (error) {
+    if (error instanceof Response) throw error;
+
     logError(error);
+
     return data(
       { error: intent === "add" ? ADD_ERROR : UPDATE_ERROR },
-      {
-        headers: setCookieHeaders(cookies),
-      },
+      { headers: await sessionHeaders() },
     );
   }
 }

@@ -1,5 +1,4 @@
 import {
-  data,
   redirect,
   useActionData,
   useLoaderData,
@@ -23,7 +22,8 @@ import { XIcon } from "../../components/ui/icons";
 import { useCurrentUser } from "../../hooks";
 import { ApiError } from "../../lib/api-error";
 import { formatPrice } from "../../lib/format-price";
-import { createOrder, getCart } from "../../services";
+import { createOrder } from "../../services";
+import { commitSession, getSession } from "../../lib/session.server";
 import { applyServerFieldErrors } from "../../lib/apply-server-field-errors";
 import {
   checkoutSchema,
@@ -35,24 +35,23 @@ import z from "zod";
 import { logError } from "../../lib/log-error";
 import { apiCookies, setCookieHeaders } from "../../lib/api-cookies";
 import { pageTitle } from "../../lib/page-meta";
+import { getCartFromSession } from "../../lib/session-utils";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  try {
-    const cookies = apiCookies(request);
-    const cart = await getCart(cookies);
+  const session = await getSession(request);
+  const { cart, sessionChanged } = await getCartFromSession(session);
 
-    if (cart === null || cart.items.length === 0) {
-      return redirect("/cart");
-    }
-
-    return { cart };
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw data(error.message, { status: error.status });
-    }
-
-    throw error;
+  if (cart === null || cart.items.length === 0) {
+    return redirect("/cart", {
+      headers: sessionChanged
+        ? {
+            "Set-Cookie": await commitSession(session),
+          }
+        : undefined,
+    });
   }
+
+  return { cart };
 }
 
 export async function action({ request }: ActionFunctionArgs) {

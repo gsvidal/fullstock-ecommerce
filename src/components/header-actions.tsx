@@ -4,11 +4,9 @@ import { Button } from "./ui";
 import { CartIcon } from "./ui/icons";
 
 export default function HeaderActions() {
-  const cartResult = useCurrentCart();
+  const cart = useCurrentCart();
 
-  const cartItemsCount = cartResult.ok
-    ? (cartResult.cart?.totalQuantity ?? 0)
-    : 0;
+  const cartItemsCount = cart?.totalQuantity ?? 0;
 
   return (
     <div className="flex items-center gap-2">

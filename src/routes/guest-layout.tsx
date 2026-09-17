@@ -1,13 +1,20 @@
-import { Outlet, redirect, type LoaderFunctionArgs } from "react-router";
-import { getSession } from "../lib/session.server";
+import { data, Outlet, redirect, type LoaderFunctionArgs } from "react-router";
+import { commitSession, getSession } from "../lib/session.server";
+import { getUserFromSession } from "../lib/session-utils";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request);
-  const userId = session.get("userId");
+  const { user, sessionChanged } = await getUserFromSession(session);
 
-  if (userId !== undefined) {
+  if (user !== null) {
     throw redirect("/");
   }
+
+  return data(null, {
+    headers: sessionChanged
+      ? { "Set-Cookie": await commitSession(session) }
+      : undefined,
+  });
 }
 
 export default function GuestLayout() {

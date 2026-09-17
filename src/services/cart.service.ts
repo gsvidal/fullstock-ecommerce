@@ -1,6 +1,43 @@
 import * as db from "../db/index.ts";
 import * as cartItemRepository from "../repositories/cart-item.repository.ts";
 import * as cartRepository from "../repositories/cart.repository.ts";
+import type { Cart } from "../repositories/cart.repository.ts";
+import * as cartItemService from "./cart-item.service.ts";
+import type { HydratedCartItem } from "./cart-item.service.ts";
+
+export type { HydratedCartItem };
+
+export interface HydratedCart {
+  id: number;
+  createdAt: Date;
+  updatedAt: Date;
+  items: HydratedCartItem[];
+  totalQuantity: number;
+  totalPrice: number;
+}
+
+export async function createCart(userId?: number): Promise<Cart> {
+  return cartRepository.create(userId);
+}
+
+export async function getCart(id: number): Promise<Cart | null> {
+  return cartRepository.findById(id);
+}
+
+export async function getHydratedCart(
+  id: number,
+): Promise<HydratedCart | null> {
+  const cart = await cartRepository.findById(id);
+
+  if (cart === null) return null;
+
+  const items = await cartItemService.getHydratedItemsByCartId(id);
+
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = items.reduce((sum, item) => sum + item.lineTotal, 0);
+
+  return { ...cart, items, totalQuantity, totalPrice };
+}
 
 export async function resolveCartId(
   visitorCartId: number | undefined,

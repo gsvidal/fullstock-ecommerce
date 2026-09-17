@@ -3,7 +3,6 @@ import { Button, Container, Section, Separator } from "../components/ui";
 import { getProduct } from "../services/product.service";
 import { formatPrice } from "../lib/format-price";
 import type { action as cartItemsAction } from "../routes/cart-items";
-import { useCurrentCart } from "../hooks";
 import { pageTitle } from "../lib/page-meta";
 import type { Route } from "./+types/product-page";
 
@@ -24,11 +23,9 @@ export function meta({ loaderData }: Route.MetaArgs) {
 export default function ProductPage({ loaderData }: Route.ComponentProps) {
   const { product } = loaderData;
   const fetcher = useFetcher<typeof cartItemsAction>();
-  const cartResult = useCurrentCart();
 
   const isAdding = fetcher.state !== "idle";
   const error = isAdding ? undefined : fetcher.data?.error;
-  const isCartOk = cartResult.ok;
 
   return (
     <Section>
@@ -53,17 +50,11 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
               type="submit"
               size="xl"
               className="w-full md:w-80"
-              disabled={isAdding || !isCartOk}
+              disabled={isAdding}
             >
               {isAdding ? "Agregando..." : "Agregar al Carrito"}
             </Button>
           </fetcher.Form>
-          {!isCartOk && (
-            <p className="mt-2 text-xs text-error" role="status">
-              No pudimos cargar tu carrito. Recarga la página para agregar
-              productos.
-            </p>
-          )}
           {error && (
             <p className="mt-2 text-xs text-error" role="alert">
               {error}

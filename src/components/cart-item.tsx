@@ -1,4 +1,4 @@
-import type { CartItem as CartItemType } from "../types";
+import type { HydratedCartItem as CartItemType } from "../services/cart.service";
 import { Button } from "./ui";
 import { formatPrice } from "../lib/format-price";
 import { MinusIcon, PlusIcon, TrashIcon } from "./ui/icons";

@@ -141,3 +141,5 @@ export function commitSession(session: Session<SessionData>) {
 export function destroySession(session: Session<SessionData>) {
   return sessionStorage.destroySession(session);
 }
+
+export type AppSession = Session<SessionData>;

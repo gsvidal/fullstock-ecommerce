@@ -1,23 +1,3 @@
-export type CartItem = {
-  id: number;
-  quantity: number;
-  lineTotal: number;
-  product: {
-    id: number;
-    title: string;
-    slug: string;
-    price: number;
-    imgSrc: string;
-  };
-};
-
-export type Cart = {
-  id: number;
-  items: CartItem[];
-  totalQuantity: number;
-  totalPrice: number;
-};
-
 // Lo que el formulario de checkout envía a POST /orders. La API completa el
 // resto de la orden (total, items) a partir del carrito de la sesión.
 export type ShippingInfo = {

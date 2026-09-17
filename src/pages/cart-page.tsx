@@ -1,8 +1,7 @@
 import CartItem from "../components/cart-item";
-import { Button, Container, MessageScreen, Section } from "../components/ui";
+import { Button, Container, Section } from "../components/ui";
 import { formatPrice } from "../lib/format-price";
 import { useCurrentCart } from "../hooks";
-import { useRevalidator } from "react-router";
 
 export function meta() {
   return [
@@ -13,23 +12,7 @@ export function meta() {
 }
 
 export default function CartPage() {
-  const cartResult = useCurrentCart();
-  const revalidator = useRevalidator();
-
-  if (!cartResult.ok) {
-    return (
-      <MessageScreen
-        title="Algo salió mal"
-        description="No pudimos cargar tu carrito."
-      >
-        <Button size="lg" onClick={() => revalidator.revalidate()}>
-          Recargar la página
-        </Button>
-      </MessageScreen>
-    );
-  }
-
-  const cart = cartResult.cart;
+  const cart = useCurrentCart();
   const items = cart?.items ?? [];
   const totalPrice = cart?.totalPrice ?? 0;
 

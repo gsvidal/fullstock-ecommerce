@@ -1,24 +1,21 @@
 import {
+  data,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
   type LoaderFunctionArgs,
-  type ShouldRevalidateFunctionArgs,
 } from "react-router";
 import Header from "./components/header";
 import ProgressBar from "./components/progress-bar";
 import Footer from "./components/footer";
-import { getCart } from "./services";
-import { getUserById } from "./services/user.service";
-import { logError } from "./lib/log-error";
 import type { ReactNode } from "react";
 import { Spinner } from "./components/ui";
 import RouteErrorBoundary from "./components/route-error-boundary";
 import "./styles/index.css";
-import { getSession } from "./lib/session.server";
-import { apiCookies } from "./lib/api-cookies";
+import { getSession, commitSession } from "./lib/session.server";
+import { getCartFromSession, getUserFromSession } from "./lib/session-utils";
 
 // Aplica el tema antes de que React monte, para evitar el parpadeo (FOUC).
 // Venía del `<script>` inline de `index.html`, que ya no existe.
@@ -33,39 +30,23 @@ const THEME_SCRIPT = `(function () {
   }
 })();`;
 
-async function getCurrentUser(request: Request) {
-  const session = await getSession(request);
-  const userId = session.get("userId");
-  if (userId === undefined) return null;
-
-  return getUserById(userId);
-}
-
 export async function loader({ request }: LoaderFunctionArgs) {
-  const cookies = apiCookies(request);
-  const [user, cartResult] = await Promise.all([
-    getCurrentUser(request),
-    getCart(cookies)
-      .then((cart) => ({
-        ok: true as const,
-        cart,
-      }))
-      .catch((error) => {
-        logError(error);
-        return { ok: false as const };
-      }),
+  const session = await getSession(request);
+
+  const [userResult, cartResult] = await Promise.all([
+    getUserFromSession(session),
+    getCartFromSession(session),
   ]);
 
-  return { user, cartResult };
-}
-
-export function shouldRevalidate({
-  formMethod,
-  nextUrl,
-}: ShouldRevalidateFunctionArgs) {
-  if (formMethod != null && formMethod.toUpperCase() !== "GET") return true;
-
-  return nextUrl.pathname === "/cart" || nextUrl.pathname === "/checkout";
+  return data(
+    { user: userResult.user, cart: cartResult.cart },
+    {
+      headers:
+        userResult.sessionChanged || cartResult.sessionChanged
+          ? { "Set-Cookie": await commitSession(session) }
+          : undefined,
+    },
+  );
 }
 
 export function meta() {
