@@ -1,12 +1,12 @@
 import { data, redirect, type ActionFunctionArgs } from "react-router";
 import { logError } from "../lib/log-error";
+import { commitSession, getSession } from "../lib/session.server";
+import { getCart, createCart } from "../services/cart.service";
 import {
-  commitSession,
-  getSession,
-  type AppSession,
-} from "../lib/session.server";
-import * as cartService from "../services/cart.service";
-import * as cartItemService from "../services/cart-item.service";
+  addProductToCart,
+  updateCartItemQuantity,
+  deleteCartItem,
+} from "../services/cart-item.service";
 import {
   createCartItemBodySchema,
   updateCartItemBodySchema,
@@ -19,21 +19,7 @@ const UPDATE_ERROR = "No pudimos actualizar el carrito. Intenta de nuevo.";
 export function loader() {
   return redirect("/cart");
 }
-
-async function requireCart(session: AppSession) {
-  const cartId = session.get("cartId");
-  const cart = cartId === undefined ? null : await cartService.getCart(cartId);
-
-  if (cart === null) {
-    session.unset("cartId");
-
-    throw redirect("/cart", {
-      headers: { "Set-Cookie": await commitSession(session) },
-    });
-  }
-
-  return cart;
-}
+import { requireCart } from "../guards/cart.guard";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -55,16 +41,13 @@ export async function action({ request }: ActionFunctionArgs) {
         );
 
         const existingCart =
-          initialCartId === undefined
-            ? null
-            : await cartService.getCart(initialCartId);
+          initialCartId === undefined ? null : await getCart(initialCartId);
 
-        const cart =
-          existingCart ?? (await cartService.createCart(session.get("userId")));
+        const cart = existingCart ?? (await createCart(session.get("userId")));
 
         if (existingCart === null) session.set("cartId", cart.id);
 
-        await cartItemService.addProductToCart(cart.id, {
+        await addProductToCart(cart.id, {
           productId,
           quantity,
         });
@@ -78,11 +61,7 @@ export async function action({ request }: ActionFunctionArgs) {
           Object.fromEntries(formData),
         );
 
-        const item = await cartItemService.updateCartItemQuantity(
-          cart.id,
-          itemId,
-          quantity,
-        );
+        const item = await updateCartItemQuantity(cart.id, itemId, quantity);
 
         if (item === null) throw redirect("/cart");
 
@@ -95,7 +74,7 @@ export async function action({ request }: ActionFunctionArgs) {
           Object.fromEntries(formData),
         );
 
-        const removed = await cartItemService.deleteCartItem(cart.id, itemId);
+        const removed = await deleteCartItem(cart.id, itemId);
 
         if (!removed) throw redirect("/cart");
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { idSchema } from "./shared";
 
 export const checkoutSchema = z.object({
   email: z.email("Ingresa un correo válido"),
@@ -14,6 +15,7 @@ export const checkoutSchema = z.object({
   region: z.string().min(1, "La provincia/estado es obligatorio"),
   zipCode: z.string().min(1, "El código postal es obligatorio"),
   phone: z.string().min(1, "El teléfono es obligatorio"),
+  cartId: idSchema,
 });
 
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>;

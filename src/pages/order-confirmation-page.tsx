@@ -1,17 +1,12 @@
-import {
-  redirect,
-  useLoaderData,
-  data,
-  type LoaderFunctionArgs,
-} from "react-router";
+import { redirect, data, type LoaderFunctionArgs } from "react-router";
 import { Container, Section } from "../components/ui";
-import { getOrder } from "../services";
+import { getOrderById } from "../services/order.service";
 import { celebrate } from "../lib/confetti-celebration";
-import { ApiError } from "../lib/api-error";
 import { useEffect } from "react";
 import { idSchema } from "../schemas/shared";
-import { apiCookies } from "../lib/api-cookies";
+import { getSession } from "../lib/session.server";
 import { pageTitle } from "../lib/page-meta";
+import type { Route } from "./+types/order-confirmation-page";
 
 export async function loader({ url, request }: LoaderFunctionArgs) {
   const { success, data: orderId } = idSchema.safeParse(
@@ -22,24 +17,32 @@ export async function loader({ url, request }: LoaderFunctionArgs) {
     return redirect("/");
   }
 
-  try {
-    const cookies = apiCookies(request);
-    const order = await getOrder(orderId, cookies);
-    return { order };
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw data(error.message, { status: error.status });
-    }
-    throw error;
+  const order = await getOrderById(orderId);
+
+  if (order === null) {
+    throw data("Orden no encontrada", { status: 404 });
   }
+
+  const session = await getSession(request);
+  const userId = session.get("userId");
+  const isOwner = order.userId !== null && order.userId === userId;
+  const isJustCreated = session.get("lastOrderId") === orderId;
+
+  if (!isOwner && !isJustCreated) {
+    throw data("Orden no encontrada", { status: 404 });
+  }
+
+  return { order };
 }
 
 export function meta() {
   return [pageTitle("Orden confirmada")];
 }
 
-export default function OrderConfirmationPage() {
-  const { order } = useLoaderData<typeof loader>();
+export default function OrderConfirmationPage({
+  loaderData,
+}: Route.ComponentProps) {
+  const { order } = loaderData;
 
   useEffect(() => celebrate(), []);
 

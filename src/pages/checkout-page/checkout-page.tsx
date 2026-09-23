@@ -22,7 +22,9 @@ import { XIcon } from "../../components/ui/icons";
 import { useCurrentUser } from "../../hooks";
 import { ApiError } from "../../lib/api-error";
 import { formatPrice } from "../../lib/format-price";
-import { createOrder } from "../../services";
+import { createOrder } from "../../services/order.service";
+import { getUserById } from "../../services/user.service";
+import { requireCart } from "../../guards/cart.guard";
 import { commitSession, getSession } from "../../lib/session.server";
 import { applyServerFieldErrors } from "../../lib/apply-server-field-errors";
 import {
@@ -33,7 +35,6 @@ import {
 import { COUNTRIES, SHIPPING_FIELDS } from "./fields";
 import z from "zod";
 import { logError } from "../../lib/log-error";
-import { apiCookies, setCookieHeaders } from "../../lib/api-cookies";
 import { pageTitle } from "../../lib/page-meta";
 import { getCartFromSession } from "../../lib/session-utils";
 
@@ -62,18 +63,34 @@ export async function action({ request }: ActionFunctionArgs) {
     return { fields: z.flattenError(parsed.error).fieldErrors };
   }
 
-  const cookies = apiCookies(request);
+  const session = await getSession(request);
+  const cart = await requireCart(session);
+
+  if (parsed.data.cartId !== cart.id) {
+    return redirect("/cart");
+  }
+
+  let userId = session.get("userId");
+  if (userId !== undefined) {
+    const user = await getUserById(userId);
+    if (user === null) {
+      session.unset("userId");
+      userId = undefined;
+    } else {
+      parsed.data.email = user.email;
+    }
+  }
 
   try {
-    const order = await createOrder(parsed.data, cookies);
+    const order = await createOrder(cart.id, parsed.data, userId);
+
+    session.unset("cartId");
+    session.set("lastOrderId", order.id);
 
     return redirect(`/order-confirmation?orderId=${order.id}`, {
-      headers: setCookieHeaders(cookies),
+      headers: { "Set-Cookie": await commitSession(session) },
     });
   } catch (error) {
-    if (error instanceof ApiError && error.status === 422 && error.fields) {
-      return { fields: error.fields };
-    }
     if (
       error instanceof ApiError &&
       (error.status === 400 || error.status === 404 || error.status === 409)
@@ -120,6 +137,7 @@ export default function CheckoutPage() {
       region: "",
       zipCode: "",
       phone: "",
+      cartId: cart.id,
     },
   });
 
@@ -235,6 +253,7 @@ export default function CheckoutPage() {
                     />
                   ),
                 )}
+                <input type="hidden" value={cart.id} {...register("cartId")} />
               </div>
             </fieldset>
 
