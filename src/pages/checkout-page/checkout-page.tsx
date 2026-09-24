@@ -20,7 +20,6 @@ import {
 } from "../../components/ui";
 import { XIcon } from "../../components/ui/icons";
 import { useCurrentUser } from "../../hooks";
-import { ApiError } from "../../lib/api-error";
 import { formatPrice } from "../../lib/format-price";
 import { createOrder } from "../../services/order.service";
 import { getUserById } from "../../services/user.service";
@@ -56,33 +55,37 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const parsed = checkoutSchema.safeParse(Object.fromEntries(formData));
-
-  if (!parsed.success) {
-    return { fields: z.flattenError(parsed.error).fieldErrors };
-  }
-
-  const session = await getSession(request);
-  const cart = await requireCart(session);
-
-  if (parsed.data.cartId !== cart.id) {
-    return redirect("/cart");
-  }
-
-  let userId = session.get("userId");
-  if (userId !== undefined) {
-    const user = await getUserById(userId);
-    if (user === null) {
-      session.unset("userId");
-      userId = undefined;
-    } else {
-      parsed.data.email = user.email;
-    }
-  }
-
   try {
+    const formData = await request.formData();
+    const parsed = checkoutSchema.safeParse(Object.fromEntries(formData));
+
+    if (!parsed.success) {
+      return { fields: z.flattenError(parsed.error).fieldErrors };
+    }
+
+    const session = await getSession(request);
+    const cart = await requireCart(session);
+
+    if (parsed.data.cartId !== cart.id) {
+      return redirect("/cart");
+    }
+
+    let userId = session.get("userId");
+    if (userId !== undefined) {
+      const user = await getUserById(userId);
+      if (user === null) {
+        session.unset("userId");
+        userId = undefined;
+      } else {
+        parsed.data.email = user.email;
+      }
+    }
+
     const order = await createOrder(cart.id, parsed.data, userId);
+
+    if (order === null) {
+      return redirect("/cart");
+    }
 
     session.unset("cartId");
     session.set("lastOrderId", order.id);
@@ -91,15 +94,7 @@ export async function action({ request }: ActionFunctionArgs) {
       headers: { "Set-Cookie": await commitSession(session) },
     });
   } catch (error) {
-    if (
-      error instanceof ApiError &&
-      (error.status === 400 || error.status === 404 || error.status === 409)
-    ) {
-      return redirect("/cart");
-    }
-
     logError(error);
-
     return { root: "No pudimos procesar tu orden. Intenta de nuevo." };
   }
 }

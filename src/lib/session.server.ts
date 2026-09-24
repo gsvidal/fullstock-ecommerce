@@ -1,8 +1,6 @@
 import crypto from "node:crypto";
-import { parseCookie, stringifySetCookie } from "cookie";
-import { createSessionStorage, type Cookie, type Session } from "react-router";
+import { createSessionStorage, type Session } from "react-router";
 import { pool } from "../db";
-import { env } from "../env.server";
 
 // Espejo de `src/types/session.d.ts` de la API, que declaraba lo mismo
 // aumentando el módulo de express-session.
@@ -12,61 +10,7 @@ export type SessionData = {
   lastOrderId: number;
 };
 
-const COOKIE_NAME = "connect.sid";
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-// `cookie-signature` de Express, escrito a mano para no sumar un paquete por
-// dos funciones. React Router firma igual, así que esto es interoperable.
-function sign(value: string, secret: string): string {
-  const hash = crypto
-    .createHmac("sha256", secret)
-    .update(value)
-    .digest("base64");
-
-  return `${value}.${hash.replace(/=+$/, "")}`;
-}
-
-function unsign(signed: string, secret: string): string | null {
-  const value = signed.slice(0, signed.lastIndexOf("."));
-  const expected = Buffer.from(sign(value, secret));
-  const actual = Buffer.from(signed);
-  // Longitudes distintas rompen `timingSafeEqual`, así que se chequea antes.
-  if (expected.length !== actual.length) return null;
-  return crypto.timingSafeEqual(expected, actual) ? value : null;
-}
-
-const expressSessionCookie: Cookie = {
-  name: COOKIE_NAME,
-  isSigned: true,
-
-  async parse(cookieHeader) {
-    if (cookieHeader === null) return null;
-    const raw = parseCookie(cookieHeader)[COOKIE_NAME];
-    if (raw === undefined || !raw.startsWith("s:")) return null;
-    return unsign(raw.slice(2), env.SESSION_SECRET);
-  },
-
-  async serialize(sid: string) {
-    // Un `sid` vacío es lo que manda `destroySession`: hay que expirar.
-    if (sid === "") {
-      return stringifySetCookie({
-        name: COOKIE_NAME,
-        value: "",
-        path: "/",
-        httpOnly: true,
-        expires: new Date(0),
-      });
-    }
-
-    return stringifySetCookie({
-      name: COOKIE_NAME,
-      value: `s:${sign(sid, env.SESSION_SECRET)}`,
-      path: "/",
-      httpOnly: true,
-      maxAge: ONE_WEEK_MS / 1000,
-    });
-  },
-};
 
 // ⚠️ Esta metadata NO es dato de la aplicación, y NO es opcional.
 // Ver la prueba 2: sin ella, `express-session` revienta al leer la fila.
@@ -78,7 +22,12 @@ const expressCookieMeta = (expires: Date) => ({
 });
 
 const sessionStorage = createSessionStorage<SessionData>({
-  cookie: expressSessionCookie,
+  cookie: {
+    name: "__session",
+    httpOnly: true,
+    path: "/",
+    maxAge: ONE_WEEK_MS / 1000,
+  },
 
   async createData(data, expires) {
     // Mismo esquema de id que el `uid-safe(24)` de express-session.

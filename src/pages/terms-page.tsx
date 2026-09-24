@@ -1,5 +1,5 @@
-import { Prose, Section } from "../../components/ui";
-import { pageTitle } from "../../lib/page-meta";
+import { Prose, Section } from "../components/ui";
+import { pageTitle } from "../lib/page-meta";
 
 export function meta() {
   return [pageTitle("Términos y condiciones")];

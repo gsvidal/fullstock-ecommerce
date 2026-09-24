@@ -1,4 +1,3 @@
-import { ApiError } from "../lib/api-error.ts";
 import * as password from "../lib/password.server.ts";
 import * as userRepository from "../repositories/user.repository.ts";
 import type { PublicUser } from "../repositories/user.repository.ts";
@@ -6,11 +5,11 @@ import type { PublicUser } from "../repositories/user.repository.ts";
 export async function createUser(
   email: string,
   plainPassword: string,
-): Promise<PublicUser> {
+): Promise<PublicUser | null> {
   const existing = await userRepository.findByEmail(email);
 
   if (existing !== null) {
-    throw new ApiError("El email ya está registrado", 409);
+    return null;
   }
 
   const passwordHash = await password.hash(plainPassword);
@@ -42,17 +41,17 @@ export async function getUserByEmail(
 export async function verifyCredentials(
   email: string,
   plainPassword: string,
-): Promise<PublicUser> {
+): Promise<PublicUser | null> {
   const user = await userRepository.findByEmail(email);
 
   if (user === null) {
-    throw new ApiError("Credenciales inválidas", 401);
+    return null;
   }
 
   const match = await password.compare(plainPassword, user.password);
 
   if (!match) {
-    throw new ApiError("Credenciales inválidas", 401);
+    return null;
   }
 
   const { password: _password, ...publicUser } = user;

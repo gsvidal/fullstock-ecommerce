@@ -1,5 +1,4 @@
 import * as db from "../db/index.ts";
-import { ApiError } from "../lib/api-error.ts";
 import * as cartRepository from "../repositories/cart.repository.ts";
 import * as orderRepository from "../repositories/order.repository.ts";
 import type { Order, OrderItem } from "../repositories/order.repository.ts";
@@ -10,15 +9,15 @@ export async function createOrder(
   cartId: number,
   shippingInfo: CheckoutFormValues,
   userId?: number,
-): Promise<Order> {
+): Promise<Order | null> {
   const cart = await cartService.getHydratedCart(cartId);
 
   if (cart === null) {
-    throw new ApiError("No se encontró carrito", 404);
+    return null;
   }
 
   if (cart.items.length === 0) {
-    throw new ApiError("El carrito está vacío", 400);
+    return null;
   }
 
   const order = await db.withTransaction(async (client) => {

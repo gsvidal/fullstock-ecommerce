@@ -1,5 +1,6 @@
 import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
-import type { FieldErrors } from "./api-error";
+
+type FieldErrors = Record<string, string[]>;
 
 export function applyServerFieldErrors<T extends FieldValues>(
   fields: FieldErrors,

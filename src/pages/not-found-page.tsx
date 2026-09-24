@@ -1,4 +1,4 @@
-import { Button, MessageScreen } from "../../components/ui";
+import { Button, MessageScreen } from "../components/ui";
 
 export function meta() {
   return [

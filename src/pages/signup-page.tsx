@@ -14,7 +14,6 @@ import {
   PasswordField,
   Section,
 } from "../components/ui";
-import { ApiError } from "../lib/api-error";
 import { applyServerFieldErrors } from "../lib/apply-server-field-errors";
 import {
   loginSchema,
@@ -23,42 +22,40 @@ import {
 } from "../schemas/auth";
 import { createUser } from "../services/user.service";
 import { useEffect } from "react";
-import { logError } from "../lib/log-error";
 import { pageTitle } from "../lib/page-meta";
 import z from "zod";
-import type { PublicUser } from "../repositories/user.repository";
 import { commitSession, getSession } from "../lib/session.server";
 import { resolveCartId } from "../services/cart.service";
+import { logError } from "../lib/log-error";
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const parsed = loginSchema.safeParse(Object.fromEntries(formData));
-
-  if (!parsed.success) {
-    return { fields: z.flattenError(parsed.error).fieldErrors };
-  }
-
-  let user: PublicUser;
-
   try {
-    user = await createUser(parsed.data.email, parsed.data.password);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 409) {
-      return { fields: { email: [error.message] } };
+    const formData = await request.formData();
+    const parsed = loginSchema.safeParse(Object.fromEntries(formData));
+
+    if (!parsed.success) {
+      return { fields: z.flattenError(parsed.error).fieldErrors };
     }
+
+    const user = await createUser(parsed.data.email, parsed.data.password);
+
+    if (user === null) {
+      return { fields: { email: ["El email ya está registrado"] } };
+    }
+
+    const session = await getSession(request);
+    session.set("userId", user.id);
+
+    const cartId = await resolveCartId(session.get("cartId"), user.id);
+    if (cartId !== undefined) session.set("cartId", cartId);
+
+    return replace("/", {
+      headers: { "Set-Cookie": await commitSession(session) },
+    });
+  } catch (error) {
     logError(error);
     return { root: "No pudimos completar la operación. Intenta de nuevo." };
   }
-
-  const session = await getSession(request);
-  session.set("userId", user.id);
-
-  const cartId = await resolveCartId(session.get("cartId"), user.id);
-  if (cartId !== undefined) session.set("cartId", cartId);
-
-  return replace("/", {
-    headers: { "Set-Cookie": await commitSession(session) },
-  });
 }
 
 export function meta() {
