@@ -1,43 +1,27 @@
-import camelcaseKeys from "camelcase-keys";
+import { users } from "../db/schema";
 
-import * as db from "../db/index.ts";
+import { db } from "../db/index.ts";
+import { eq } from "drizzle-orm";
 
-interface UserRow {
-  id: number;
-  email: string;
-  password: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export type User = ReturnType<typeof camelcaseKeys<UserRow>>;
+export type User = typeof users.$inferSelect;
 export type PublicUser = Omit<User, "password">;
 
 export async function create(email: string, password: string): Promise<User> {
-  const result = await db.query<UserRow>(
-    "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *",
-    [email, password],
-  );
+  const [user] = await db.insert(users).values({ email, password }).returning();
 
-  const row = result.rows[0];
-  if (row === undefined) throw new Error("INSERT did not return a row");
+  if (user === undefined) throw new Error("INSERT did not return a row");
 
-  return camelcaseKeys(row);
+  return user;
 }
 
 export async function findById(id: number): Promise<User | null> {
-  const result = await db.query<UserRow>("SELECT * FROM users WHERE id = $1", [
-    id,
-  ]);
+  const [user] = await db.select().from(users).where(eq(users.id, id));
 
-  return result.rows[0] !== undefined ? camelcaseKeys(result.rows[0]) : null;
+  return user ?? null;
 }
 
 export async function findByEmail(email: string): Promise<User | null> {
-  const result = await db.query<UserRow>(
-    "SELECT * FROM users WHERE email = $1",
-    [email],
-  );
+  const [user] = await db.select().from(users).where(eq(users.email, email));
 
-  return result.rows[0] !== undefined ? camelcaseKeys(result.rows[0]) : null;
+  return user ?? null;
 }
