@@ -1,53 +1,36 @@
-import camelcaseKeys from "camelcase-keys";
+import { and, eq, getColumns, gte, lte } from "drizzle-orm";
 
-import * as db from "../db/index.ts";
+import { db } from "../db/index.ts";
+import { categories, products } from "../db/schema.ts";
 
-interface ProductRow {
-  id: number;
-  title: string;
-  slug: string;
-  img_src: string;
-  price: number;
-  description: string;
-  features: string[];
-  category_id: number;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export type Product = ReturnType<typeof camelcaseKeys<ProductRow>>;
+export type Product = typeof products.$inferSelect;
 
 export async function getByCategorySlug(
   categorySlug: string,
   filters: { minPrice?: number; maxPrice?: number } = {},
 ): Promise<Product[]> {
-  const params: (string | number)[] = [categorySlug];
-  const conditions: string[] = ["c.slug = $1"];
-
-  if (filters.minPrice !== undefined) {
-    params.push(filters.minPrice);
-    conditions.push(`p.price >= $${params.length}`);
-  }
-
-  if (filters.maxPrice !== undefined) {
-    params.push(filters.maxPrice);
-    conditions.push(`p.price <= $${params.length}`);
-  }
-
-  const result = await db.query<ProductRow>(
-    `SELECT p.*
-     FROM products p
-     JOIN categories c ON p.category_id = c.id
-     WHERE ${conditions.join(" AND ")}`,
-    params,
-  );
-  return camelcaseKeys(result.rows);
+  return await db
+    .select(getColumns(products))
+    .from(products)
+    .innerJoin(categories, eq(products.categoryId, categories.id))
+    .where(
+      and(
+        eq(categories.slug, categorySlug),
+        filters.minPrice !== undefined
+          ? gte(products.price, filters.minPrice)
+          : undefined,
+        filters.maxPrice !== undefined
+          ? lte(products.price, filters.maxPrice)
+          : undefined,
+      ),
+    );
 }
 
 export async function findBySlug(slug: string): Promise<Product | null> {
-  const result = await db.query<ProductRow>(
-    "SELECT * FROM products WHERE slug = $1",
-    [slug],
-  );
-  return result.rows[0] !== undefined ? camelcaseKeys(result.rows[0]) : null;
+  const [product] = await db
+    .select()
+    .from(products)
+    .where(eq(products.slug, slug));
+
+  return product ?? null;
 }
