@@ -22,8 +22,8 @@ CREATE TABLE public.cart_items (
     cart_id integer NOT NULL,
     product_id integer NOT NULL,
     quantity integer NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT cart_items_quantity_check CHECK ((quantity > 0))
 );
 
@@ -54,8 +54,8 @@ ALTER SEQUENCE public.cart_items_id_seq OWNED BY public.cart_items.id;
 
 CREATE TABLE public.carts (
     id integer NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     user_id integer
 );
 
@@ -91,8 +91,8 @@ CREATE TABLE public.categories (
     img_src text NOT NULL,
     alt text,
     description text NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -128,7 +128,7 @@ CREATE TABLE public.order_items (
     price integer NOT NULL,
     img_src text NOT NULL,
     quantity integer NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT order_items_price_check CHECK ((price >= 0)),
     CONSTRAINT order_items_quantity_check CHECK ((quantity > 0))
 );
@@ -172,8 +172,8 @@ CREATE TABLE public.orders (
     phone text NOT NULL,
     total integer NOT NULL,
     status text DEFAULT 'pending'::text NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     user_id integer,
     CONSTRAINT orders_total_check CHECK ((total >= 0))
 );
@@ -212,8 +212,8 @@ CREATE TABLE public.products (
     description text NOT NULL,
     features text[] DEFAULT '{}'::text[] NOT NULL,
     category_id integer NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT products_price_check CHECK ((price >= 0))
 );
 
@@ -254,7 +254,7 @@ CREATE TABLE public.schema_migrations (
 CREATE TABLE public.session (
     sid character varying NOT NULL,
     sess json NOT NULL,
-    expire timestamp without time zone NOT NULL
+    expire timestamp with time zone NOT NULL
 );
 
 
@@ -266,8 +266,8 @@ CREATE TABLE public.users (
     id integer NOT NULL,
     email text NOT NULL,
     password text NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    updated_at timestamp without time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -525,4 +525,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20260512213904'),
     ('20260526172726'),
     ('20260526180000'),
-    ('20260527204823');
+    ('20260527204823'),
+    ('20260925020656');

@@ -1,11 +1,19 @@
 import { Pool, type PoolClient, type QueryResultRow } from "pg";
 import { env } from "../env.server.ts";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { relations } from "./relations";
 
 const globalForDb = globalThis as typeof globalThis & { pool?: Pool };
 
 export const pool = (globalForDb.pool ??= new Pool({
   connectionString: env.DATABASE_URL,
 }));
+
+export const db = drizzle({ client: pool, relations });
+
+export function dbFor(client?: PoolClient) {
+  return client === undefined ? db : drizzle({ client, relations });
+}
 
 export function query<T extends QueryResultRow>(
   text: string,
