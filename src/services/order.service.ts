@@ -1,7 +1,10 @@
 import * as db from "../db/index.ts";
 import * as cartRepository from "../repositories/cart.repository.ts";
 import * as orderRepository from "../repositories/order.repository.ts";
-import type { Order, OrderItem } from "../repositories/order.repository.ts";
+import type {
+  Order,
+  OrderWithItems,
+} from "../repositories/order.repository.ts";
 import type { CheckoutFormValues } from "../schemas/checkout.ts";
 import * as cartService from "../services/cart.service.ts";
 
@@ -46,12 +49,8 @@ export async function createOrder(
   return order;
 }
 
-export type OrderWithItems = Order & { items: OrderItem[] };
+export type { OrderWithItems };
 
 export async function getOrderById(id: number): Promise<OrderWithItems | null> {
-  const order = await orderRepository.findById(id);
-  if (order === null) return null;
-
-  const items = await orderRepository.findItemsByOrderId(id);
-  return { ...order, items };
+  return await orderRepository.findByIdWithItems(id);
 }
