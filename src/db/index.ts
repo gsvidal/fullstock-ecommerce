@@ -9,10 +9,12 @@ export const pool = (globalForDb.pool ??= new Pool({
   connectionString: env.DATABASE_URL,
 }));
 
-export const db = drizzle({ client: pool, relations });
+export const db = drizzle({ client: pool, relations, logger: true });
 
 export function dbFor(client?: PoolClient) {
-  return client === undefined ? db : drizzle({ client, relations });
+  return client === undefined
+    ? db
+    : drizzle({ client, relations, logger: true });
 }
 
 export function query<T extends QueryResultRow>(

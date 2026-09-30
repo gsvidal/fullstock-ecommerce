@@ -1,56 +1,40 @@
-import camelcaseKeys from "camelcase-keys";
 import type { PoolClient } from "pg";
+import { cartItems, products } from "../db/schema.ts";
+import { db, dbFor } from "../db/index.ts";
+import { and, asc, eq, getColumns, sql } from "drizzle-orm";
+import type { Product } from "./product.repository.ts";
 
-import * as db from "../db/index.ts";
-
-interface CartItemRow {
-  id: number;
-  cart_id: number;
-  product_id: number;
-  quantity: number;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export type CartItem = ReturnType<typeof camelcaseKeys<CartItemRow>>;
-
-interface CartItemWithProductRow extends CartItemRow {
-  title: string;
-  slug: string;
-  price: number;
-  img_src: string;
-}
-
-type CartItemWithProduct = ReturnType<
-  typeof camelcaseKeys<CartItemWithProductRow>
->;
+export type CartItem = typeof cartItems.$inferSelect;
+type ProductFields = Pick<Product, "title" | "slug" | "price" | "imgSrc">;
+type CartItemWithProduct = CartItem & ProductFields;
 
 export async function getItemsWithProductByCartId(
   cartId: number,
 ): Promise<CartItemWithProduct[]> {
-  const result = await db.query<CartItemWithProductRow>(
-    `SELECT ci.*, p.title, p.slug, p.price, p.img_src
-     FROM cart_items ci
-     JOIN products p ON p.id = ci.product_id
-     WHERE ci.cart_id = $1
-     ORDER BY ci.created_at ASC`,
-    [cartId],
-  );
+  const result = await db
+    .select({
+      ...getColumns(cartItems),
+      title: products.title,
+      slug: products.slug,
+      imgSrc: products.imgSrc,
+      price: products.price,
+    })
+    .from(cartItems)
+    .innerJoin(products, eq(products.id, cartItems.productId))
+    .where(eq(cartItems.cartId, cartId))
+    .orderBy(asc(cartItems.createdAt));
 
-  return camelcaseKeys(result.rows);
+  return result;
 }
 
 export async function getByCartId(
   cartId: number,
   client?: PoolClient,
 ): Promise<CartItem[]> {
-  const result = await db.query<CartItemRow>(
-    "SELECT * FROM cart_items WHERE cart_id = $1",
-    [cartId],
-    client,
-  );
-
-  return camelcaseKeys(result.rows);
+  return dbFor(client)
+    .select()
+    .from(cartItems)
+    .where(eq(cartItems.cartId, cartId));
 }
 
 export async function findByCartAndProduct(
@@ -58,13 +42,14 @@ export async function findByCartAndProduct(
   productId: number,
   client?: PoolClient,
 ): Promise<CartItem | null> {
-  const result = await db.query<CartItemRow>(
-    "SELECT * FROM cart_items WHERE cart_id = $1 AND product_id = $2",
-    [cartId, productId],
-    client,
-  );
+  const [cartItem] = await dbFor(client)
+    .select()
+    .from(cartItems)
+    .where(
+      and(eq(cartItems.cartId, cartId), eq(cartItems.productId, productId)),
+    );
 
-  return result.rows[0] !== undefined ? camelcaseKeys(result.rows[0]) : null;
+  return cartItem ?? null;
 }
 
 type CreateCartItemData = Omit<CartItem, "id" | "createdAt" | "updatedAt">;
@@ -73,28 +58,21 @@ export async function create(
   data: CreateCartItemData,
   client?: PoolClient,
 ): Promise<CartItem> {
-  const result = await db.query<CartItemRow>(
-    `INSERT INTO cart_items (cart_id, product_id, quantity)
-     VALUES ($1, $2, $3)
-     RETURNING *`,
-    [data.cartId, data.productId, data.quantity],
-    client,
-  );
+  const [newCartItem] = await dbFor(client)
+    .insert(cartItems)
+    .values(data)
+    .returning();
 
-  const row = result.rows[0];
-
-  if (row === undefined) throw new Error("INSERT did not return a row");
-
-  return camelcaseKeys(row);
+  if (newCartItem === undefined) throw new Error("INSERT did not return a row");
+  return newCartItem;
 }
 
 export async function findById(id: number): Promise<CartItem | null> {
-  const result = await db.query<CartItemRow>(
-    "SELECT * FROM cart_items WHERE id = $1",
-    [id],
-  );
-
-  return result.rows[0] !== undefined ? camelcaseKeys(result.rows[0]) : null;
+  const [cartItem] = await db
+    .select()
+    .from(cartItems)
+    .where(eq(cartItems.id, id));
+  return cartItem ?? null;
 }
 
 export async function updateQuantity(
@@ -102,17 +80,19 @@ export async function updateQuantity(
   quantity: number,
   client?: PoolClient,
 ): Promise<CartItem> {
-  const result = await db.query<CartItemRow>(
-    "UPDATE cart_items SET quantity = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
-    [quantity, id],
-    client,
-  );
+  const [updatedCartItem] = await dbFor(client)
+    .update(cartItems)
+    .set({
+      quantity,
+      updatedAt: sql`NOW()`,
+    })
+    .where(eq(cartItems.id, id))
+    .returning();
 
-  const row = result.rows[0];
+  if (updatedCartItem === undefined)
+    throw new Error("UPDATE did not return a row");
 
-  if (row === undefined) throw new Error("UPDATE did not return a row");
-
-  return camelcaseKeys(row);
+  return updatedCartItem;
 }
 
 export async function moveToCart(
@@ -120,13 +100,14 @@ export async function moveToCart(
   cartId: number,
   client?: PoolClient,
 ): Promise<void> {
-  await db.query(
-    "UPDATE cart_items SET cart_id = $1 WHERE id = $2",
-    [cartId, id],
-    client,
-  );
+  await dbFor(client)
+    .update(cartItems)
+    .set({
+      cartId,
+    })
+    .where(eq(cartItems.id, id));
 }
 
 export async function remove(id: number): Promise<void> {
-  await db.query("DELETE FROM cart_items WHERE id = $1", [id]);
+  await db.delete(cartItems).where(eq(cartItems.id, id));
 }
