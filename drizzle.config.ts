@@ -6,6 +6,4 @@ export default defineConfig({
   schema: "./src/db/schema.ts",
   out: "./drizzle",
   dbCredentials: { url: env.DATABASE_URL },
-  // La tabla de control de dbmate no es parte del dominio.
-  tablesFilter: ["!schema_migrations"],
 });

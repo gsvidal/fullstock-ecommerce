@@ -12,13 +12,13 @@
     "typecheck": "react-router typegen && tsc -b --noEmit",
     "preview": "npm run build && npm run start",
     "start": "react-router-serve ./build/server/index.js",
-    "db:new": "dbmate new",
-    "db:up": "dbmate up",
-    "db:migrate": "dbmate migrate",
-    "db:rollback": "dbmate rollback",
-    "db:status": "dbmate status",
-    "db:drop": "dbmate drop",
-    "db:reset": "npm run db:drop && npm run db:up"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "node --env-file-if-exists=.env src/db/seed.ts",
+    "db:reset": "node --env-file-if-exists=.env src/db/reset.ts && npm run db:migrate && npm run db:seed",
+    "db:reset-test": "node --env-file-if-exists=.env src/db/reset.ts",
+    "db:check": "drizzle-kit check",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -28,7 +28,6 @@
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dbmate": "^2.35.1",
     "drizzle-orm": "1.0.0-rc.4",
     "isbot": "^5",
     "pg": "^8.23.0",
