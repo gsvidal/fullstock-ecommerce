@@ -1,6 +1,5 @@
-import type { PoolClient } from "pg";
 import { carts } from "../db/schema.ts";
-import { db, dbFor } from "../db/index.ts";
+import { db, type Executor } from "../db/index.ts";
 import { eq, sql } from "drizzle-orm";
 
 export type Cart = typeof carts.$inferSelect;
@@ -29,8 +28,11 @@ export async function touch(id: number): Promise<void> {
     .where(eq(carts.id, id));
 }
 
-export async function remove(id: number, client?: PoolClient): Promise<void> {
-  await dbFor(client).delete(carts).where(eq(carts.id, id));
+export async function remove(
+  id: number,
+  executor: Executor = db,
+): Promise<void> {
+  await executor.delete(carts).where(eq(carts.id, id));
 }
 
 export async function findById(id: number): Promise<Cart | null> {

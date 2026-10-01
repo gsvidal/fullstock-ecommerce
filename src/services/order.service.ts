@@ -1,4 +1,4 @@
-import * as db from "../db/index.ts";
+import { db } from "../db/index.ts";
 import * as cartRepository from "../repositories/cart.repository.ts";
 import * as orderRepository from "../repositories/order.repository.ts";
 import type {
@@ -23,13 +23,13 @@ export async function createOrder(
     return null;
   }
 
-  const order = await db.withTransaction(async (client) => {
+  const order = await db.transaction(async (tx) => {
     const orderData = {
       ...shippingInfo,
       userId: userId ?? null,
       total: cart.totalPrice,
     };
-    const order = await orderRepository.createOrder(orderData, client);
+    const order = await orderRepository.createOrder(orderData, tx);
 
     const items = cart.items.map((item) => ({
       orderId: order.id,
@@ -40,8 +40,8 @@ export async function createOrder(
       quantity: item.quantity,
     }));
 
-    await orderRepository.createOrderItems(items, client);
-    await cartRepository.remove(cartId, client);
+    await orderRepository.createOrderItems(items, tx);
+    await cartRepository.remove(cartId, tx);
 
     return order;
   });

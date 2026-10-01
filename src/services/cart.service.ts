@@ -1,4 +1,4 @@
-import * as db from "../db/index.ts";
+import { db } from "../db/index.ts";
 import * as cartItemRepository from "../repositories/cart-item.repository.ts";
 import * as cartRepository from "../repositories/cart.repository.ts";
 import type { Cart } from "../repositories/cart.repository.ts";
@@ -62,30 +62,30 @@ async function mergeVisitorCartIntoUserCart(
   visitorCartId: number,
   userCartId: number,
 ): Promise<void> {
-  await db.withTransaction(async (client) => {
+  await db.transaction(async (tx) => {
     const visitorItems = await cartItemRepository.getByCartId(
       visitorCartId,
-      client,
+      tx,
     );
 
     for (const visitorItem of visitorItems) {
       const existingItem = await cartItemRepository.findByCartAndProduct(
         userCartId,
         visitorItem.productId,
-        client,
+        tx,
       );
 
       if (existingItem === null) {
-        await cartItemRepository.moveToCart(visitorItem.id, userCartId, client);
+        await cartItemRepository.moveToCart(visitorItem.id, userCartId, tx);
       } else {
         await cartItemRepository.updateQuantity(
           existingItem.id,
           existingItem.quantity + visitorItem.quantity,
-          client,
+          tx,
         );
       }
     }
 
-    await cartRepository.remove(visitorCartId, client);
+    await cartRepository.remove(visitorCartId, tx);
   });
 }

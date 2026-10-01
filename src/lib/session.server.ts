@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { createSessionStorage, type Session } from "react-router";
-import { db } from "../db";
-import { session } from "../db/schema";
+import { db } from "../db/index.ts";
+import { session } from "../db/schema.ts";
 import { and, eq, gte, sql } from "drizzle-orm";
 
 // Espejo de `src/types/session.d.ts` de la API, que declaraba lo mismo
@@ -12,23 +12,7 @@ export type SessionData = {
   lastOrderId: number;
 };
 
-export type MetaCookie = {
-  originalMaxAge: number;
-  expires: string;
-  httpOnly: boolean;
-  path: string;
-};
-
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-// ⚠️ Esta metadata NO es dato de la aplicación, y NO es opcional.
-// Ver la prueba 2: sin ella, `express-session` revienta al leer la fila.
-const expressCookieMeta = (expires: Date) => ({
-  originalMaxAge: ONE_WEEK_MS,
-  expires: expires.toISOString(),
-  httpOnly: true,
-  path: "/",
-});
 
 const sessionStorage = createSessionStorage<SessionData>({
   cookie: {
@@ -45,19 +29,15 @@ const sessionStorage = createSessionStorage<SessionData>({
 
     await db.insert(session).values({
       sid,
-      sess: { ...data, cookie: expressCookieMeta(expire) },
+      sess: data,
       expire,
     });
     return sid;
   },
 
   async readData(sid) {
-    // `sess - 'cookie'` descarta la metadata de express-session en la consulta:
-    // no es dato nuestro y no queremos que se vea como si lo fuera. El `::jsonb`
-    // hace falta porque la columna es `json`, y ese operador es de `jsonb`.
-
     const [sessionRow] = await db
-      .select({ sess: sql<SessionData>`${session.sess}::jsonb - 'cookie'` })
+      .select({ sess: session.sess })
       .from(session)
       .where(and(eq(session.sid, sid), gte(session.expire, sql`NOW()`)));
     return sessionRow?.sess ?? null;
@@ -65,27 +45,18 @@ const sessionStorage = createSessionStorage<SessionData>({
 
   async updateData(sid, data, expires) {
     const expire = expires ?? new Date(Date.now() + ONE_WEEK_MS);
-    // Se preserva la metadata que la fila ya tenía: reescribirla en cada commit
-    // volvería la sesión "rolling", que no es lo que hace express-session con
-    // `resave: false`.
-    const [cookieRow] = await db
-      .select({ cookie: sql<MetaCookie>`${session.sess}::jsonb -> 'cookie'` })
-      .from(session)
-      .where(eq(session.sid, sid));
-
-    const cookie = cookieRow?.cookie ?? expressCookieMeta(expire);
 
     await db
       .insert(session)
       .values({
         sid,
-        sess: { ...data, cookie },
+        sess: data,
         expire,
       })
       .onConflictDoUpdate({
         target: session.sid,
         set: {
-          sess: { ...data, cookie },
+          sess: data,
           expire,
         },
       });

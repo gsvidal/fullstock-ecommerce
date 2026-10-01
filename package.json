@@ -25,7 +25,6 @@
     "@react-router/node": "^8.3.0",
     "@react-router/serve": "^8.3.0",
     "bcrypt": "^6.0.0",
-    "camelcase-keys": "^10.0.2",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

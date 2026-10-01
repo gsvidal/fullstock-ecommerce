@@ -1,6 +1,4 @@
-import type { PoolClient } from "pg";
-
-import { db, dbFor } from "../db/index.ts";
+import { db, type Executor } from "../db/index.ts";
 import { orderItems, orders } from "../db/schema.ts";
 
 export type Order = typeof orders.$inferSelect;
@@ -13,9 +11,9 @@ export type CreateOrderData = Omit<
 
 export async function createOrder(
   data: CreateOrderData,
-  client?: PoolClient,
+  executor: Executor = db,
 ): Promise<Order> {
-  const [order] = await dbFor(client).insert(orders).values(data).returning();
+  const [order] = await executor.insert(orders).values(data).returning();
 
   if (order === undefined) throw new Error("INSERT did not return a row");
 
@@ -29,11 +27,11 @@ export type CreateOrderItemData = Omit<
 
 export async function createOrderItems(
   items: CreateOrderItemData[],
-  client?: PoolClient,
+  executor: Executor = db,
 ): Promise<OrderItem[]> {
   if (items.length === 0) return [];
 
-  return await dbFor(client).insert(orderItems).values(items).returning();
+  return await executor.insert(orderItems).values(items).returning();
 }
 
 export type OrderWithItems = Order & { items: OrderItem[] };
