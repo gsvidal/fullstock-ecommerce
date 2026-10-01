@@ -11,6 +11,7 @@ import {
   check,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import type { MetaCookie, SessionData } from "../lib/session.server";
 
 export const cartItems = pgTable(
   "cart_items",
@@ -149,7 +150,9 @@ export const session = pgTable(
   "session",
   {
     sid: varchar().primaryKey(),
-    sess: json().notNull(),
+    sess: json()
+      .$type<Partial<SessionData> & { cookie: MetaCookie }>()
+      .notNull(),
     expire: timestamp().notNull(),
   },
   (table) => [
