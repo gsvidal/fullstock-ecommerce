@@ -6,5 +6,5 @@ const formatter = new Intl.NumberFormat("es-PE", {
 });
 
 export function formatPrice(cents: number) {
-  return formatter.format(cents / 100);
+  return formatter.format(cents / 100); // S/ 59.90
 }
