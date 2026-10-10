@@ -24,10 +24,16 @@ export default function CartPage() {
             Carrito de compras
           </h1>
           <div className="flex flex-col rounded-xl border border-border">
-            {items.map((item) => (
-              <CartItem key={item.id} item={item} />
-            ))}
-            <div className="flex justify-between border-b border-border p-6 text-base font-medium">
+            <ul className="flex flex-col">
+              {items.map((item) => (
+                <CartItem key={item.id} item={item} />
+              ))}
+            </ul>
+            <div
+              role="group"
+              aria-label="Total"
+              className="flex justify-between border-b border-border p-6 text-base font-medium"
+            >
               <p>Total</p>
               <p>{formatPrice(totalPrice)}</p>
             </div>

@@ -17,7 +17,7 @@ export default function CartItem({ item }: CartItemProps) {
   const isLastUnit = item.quantity === 1;
 
   return (
-    <div className="flex gap-6 border-b border-b-border p-6">
+    <li className="flex gap-6 border-b border-b-border p-6">
       <div className="w-20 rounded-xl bg-muted-background">
         <img
           src={item.product.imgSrc}
@@ -26,7 +26,7 @@ export default function CartItem({ item }: CartItemProps) {
         />
       </div>
       <div className="flex grow flex-col justify-between">
-        <div className="flex items-center justify-between gap-4">
+        <header className="flex items-center justify-between gap-4">
           <h2 className="text-sm">{item.product.title}</h2>
           <fetcher.Form method="post" action="/cart/items">
             <input type="hidden" name="intent" value="remove" />
@@ -41,12 +41,16 @@ export default function CartItem({ item }: CartItemProps) {
               <TrashIcon />
             </Button>
           </fetcher.Form>
-        </div>
+        </header>
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <p className="text-sm font-medium">
             {formatPrice(item.product.price)}
           </p>
-          <div className="flex items-center gap-4">
+          <div
+            role="group"
+            aria-label="Cantidad"
+            className="flex items-center gap-4"
+          >
             <fetcher.Form method="post" action="/cart/items">
               <input type="hidden" name="itemId" value={item.id} />
               {isLastUnit ? (
@@ -98,6 +102,6 @@ export default function CartItem({ item }: CartItemProps) {
           </p>
         )}
       </div>
-    </div>
+    </li>
   );
 }
