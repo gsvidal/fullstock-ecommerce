@@ -1,17 +1,11 @@
-import { expect, test, type Page } from "@playwright/test";
-import { login, logout, signup, uniqueEmail } from "./helpers.ts";
-
-async function expectFieldError(
-  page: Page,
-  label: string,
-  message: string,
-): Promise<void> {
-  const field = page.getByLabel(label, { exact: true });
-
-  await expect(field).toBeVisible();
-  await expect(field).toHaveAttribute("aria-invalid", "true");
-  await expect(field).toHaveAccessibleDescription(message);
-}
+import { expect, test } from "@playwright/test";
+import {
+  expectFieldError,
+  login,
+  logout,
+  signup,
+  uniqueEmail,
+} from "./helpers.ts";
 
 test("una persona nueva crea su cuenta", async ({ page }) => {
   await signup(page);

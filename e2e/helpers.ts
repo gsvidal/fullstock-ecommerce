@@ -13,6 +13,18 @@ export function uniqueEmail(): string {
   return `e2e-${randomUUID()}@example.com`;
 }
 
+export async function expectFieldError(
+  page: Page,
+  label: string,
+  message: string,
+): Promise<void> {
+  const field = page.getByLabel(label, { exact: true });
+
+  await expect(field).toBeVisible();
+  await expect(field).toHaveAttribute("aria-invalid", "true");
+  await expect(field).toHaveAccessibleDescription(message);
+}
+
 export async function signup(
   page: Page,
   email = uniqueEmail(),

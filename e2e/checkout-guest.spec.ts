@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { addToCart, uniqueEmail } from "./helpers.ts";
+import { addToCart, expectFieldError, uniqueEmail } from "./helpers.ts";
 
 interface ShippingDetails {
   email?: string;
@@ -69,22 +69,6 @@ function orderTotal(page: Page): Locator {
   return page.getByText("Total", { exact: true }).locator("..");
 }
 
-async function expectFieldError(
-  page: Page,
-  label: string,
-  message: string,
-  role: "textbox" | "combobox" = "textbox",
-): Promise<void> {
-  const field = page.getByRole(role, {
-    name: label,
-    description: message,
-    exact: true,
-  });
-
-  await expect(field).toBeVisible();
-  await expect(field).toHaveAttribute("aria-invalid", "true");
-}
-
 test("la compra completa: desde el carrito hasta la confirmación de orden", async ({
   page,
 }) => {
@@ -137,7 +121,7 @@ test("los campos obligatorios: enviar vacío muestra errores y permanece en chec
   await expectFieldError(page, "Apellido", "El apellido es obligatorio");
   await expectFieldError(page, "Dirección", "La dirección es obligatoria");
   await expectFieldError(page, "Ciudad", "La ciudad es obligatoria");
-  await expectFieldError(page, "País", "Selecciona un país", "combobox");
+  await expectFieldError(page, "País", "Selecciona un país");
   await expectFieldError(
     page,
     "Provincia/Estado",
