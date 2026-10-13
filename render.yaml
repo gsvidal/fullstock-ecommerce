@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: fullstock-pro-0726
+    runtime: node
+    # Sin `plan`, Render elige uno pago.
+    plan: free
+    # La región de la base tiene que ser la misma: así se hablan por la red
+    # interna de Render. No se puede cambiar después.
+    region: virginia
+    # El plan gratuito no tiene pre-deploy, así que las migraciones van acá: si
+    # una falla, falla el build y la versión anterior sigue sirviendo. El seed
+    # no carga nada si el catálogo ya existe.
+    buildCommand: npm ci && npm run build && npm run db:migrate && npm run db:seed
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fullstock-pro-0726-db
+          property: connectionString
+      # Render lo genera una vez, al crear el servicio, y nadie lo ve.
+      - key: SESSION_SECRET
+        generateValue: true
+
+databases:
+  - name: fullstock-pro-0726-db
+    plan: free
+    region: virginia
+    # La misma versión que el CI (`postgres:16`) y que la base de desarrollo.
+    postgresMajorVersion: "16"
