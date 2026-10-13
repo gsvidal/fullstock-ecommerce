@@ -116,7 +116,11 @@ test("los campos obligatorios: enviar vacío muestra errores y permanece en chec
   await page.getByRole("button", { name: "Confirmar Orden" }).click();
 
   await expect(page).toHaveURL("/checkout");
-  await expectFieldError(page, "Correo electrónico", "Ingresa un correo válido");
+  await expectFieldError(
+    page,
+    "Correo electrónico",
+    "Ingresa un correo válido",
+  );
   await expectFieldError(page, "Nombre", "El nombre es obligatorio");
   await expectFieldError(page, "Apellido", "El apellido es obligatorio");
   await expectFieldError(page, "Dirección", "La dirección es obligatoria");
@@ -127,7 +131,11 @@ test("los campos obligatorios: enviar vacío muestra errores y permanece en chec
     "Provincia/Estado",
     "La provincia/estado es obligatorio",
   );
-  await expectFieldError(page, "Código Postal", "El código postal es obligatorio");
+  await expectFieldError(
+    page,
+    "Código Postal",
+    "El código postal es obligatorio",
+  );
   await expectFieldError(page, "Teléfono", "El teléfono es obligatorio");
 });
 

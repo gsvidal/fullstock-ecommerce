@@ -24,10 +24,9 @@ export default defineConfig({
           name: "db",
           include: ["src/**/*.db.test.ts"],
           globalSetup: ["./src/vitest.global-setup.ts"],
-          env: {
-            DATABASE_URL: testDatabaseUrl("test"),
-            SESSION_SECRET: "test",
-          },
+          env: process.env.VITEST
+            ? { DATABASE_URL: testDatabaseUrl("test"), SESSION_SECRET: "test" }
+            : undefined,
         },
       },
     ],

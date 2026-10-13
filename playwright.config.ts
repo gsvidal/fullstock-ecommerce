@@ -9,7 +9,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   use: {
     baseURL: `http://localhost:${PORT}`,
-    // trace: "retain-on-failure",
+    trace: "retain-on-failure",
   },
   projects: [
     {
