@@ -94,7 +94,7 @@ export default function Footer({ className }: FooterProps) {
         </Section>
         <Separator />
         <small className="block py-6 text-center text-sm/6 text-muted-foreground">
-          Todos los derechos reservados © Full Stock
+          Todos los derechos reservados © {new Date().getFullYear()} Full Stock
         </small>
       </Container>
     </footer>
