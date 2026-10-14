@@ -4,7 +4,10 @@ import { HydratedRouter } from "react-router/dom";
 import { logError } from "./lib/log-error";
 import * as Sentry from "@sentry/react-router";
 
-Sentry.init({ dsn: import.meta.env.VITE_SENTRY_DSN });
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  ignoreErrors: ["Unexpected Server Error"],
+});
 
 hydrateRoot(
   document,
