@@ -13,7 +13,7 @@ services:
     buildCommand: npm ci && npm run build && npm run db:migrate && npm run db:seed
     startCommand: npm run start
     healthCheckPath: /
-    autoDeployTrigger: checksPass
+    autoDeployTrigger: off
     envVars:
       - key: DATABASE_URL
         fromDatabase:

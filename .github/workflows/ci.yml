@@ -58,3 +58,12 @@ jobs:
           name: playwright-traces
           path: test-results/
           retention-days: 7
+
+  deploy:
+    needs: [checks, tests]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl --fail-with-body --silent --show-error "$RENDER_DEPLOY_HOOK_URL"
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
