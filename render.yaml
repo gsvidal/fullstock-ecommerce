@@ -22,6 +22,10 @@ services:
       # Render lo genera una vez, al crear el servicio, y nadie lo ve.
       - key: SESSION_SECRET
         generateValue: true
+      - key: VITE_SENTRY_DSN
+        value: https://98c4de44edbe9fdb8667732dc157aac4@o4512245426618368.ingest.us.sentry.io/4512252024455168
+      - key: SENTRY_DSN
+        value: https://98c4de44edbe9fdb8667732dc157aac4@o4512245426618368.ingest.us.sentry.io/4512252024455168
 
 databases:
   - name: fullstock-pro-0726-db
