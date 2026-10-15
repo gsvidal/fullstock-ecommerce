@@ -14,6 +14,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <img
             src={product.imgSrc}
             alt={product.title}
+            loading="lazy"
             className="size-full object-contain transition-transform duration-200 group-hover:scale-105 group-focus-visible:scale-105"
           />
         </div>
