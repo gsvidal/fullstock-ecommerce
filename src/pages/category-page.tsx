@@ -6,11 +6,14 @@ import { getCategory } from "../services/category.service";
 import { getProductsByCategory } from "../services/product.service";
 import { pageTitle } from "../lib/page-meta";
 import type { Route } from "./+types/category-page";
+import { MAX_INTEGER } from "../schemas/shared";
 
 function parsePrice(value: string | null): number | undefined {
   if (value === null || value.trim() === "") return undefined;
   const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+  return Number.isFinite(parsed) && parsed >= 0
+    ? Math.min(Math.round(parsed * 100), MAX_INTEGER)
+    : undefined;
 }
 
 export async function loader({ params, request }: Route.LoaderArgs) {
@@ -20,13 +23,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const minPriceParam = url.searchParams.get("minPrice");
   const maxPriceParam = url.searchParams.get("maxPrice");
 
-  const minPriceSoles = parsePrice(minPriceParam);
-  const maxPriceSoles = parsePrice(maxPriceParam);
-
-  const minPrice =
-    minPriceSoles !== undefined ? Math.round(minPriceSoles * 100) : undefined;
-  const maxPrice =
-    maxPriceSoles !== undefined ? Math.round(maxPriceSoles * 100) : undefined;
+  const minPrice = parsePrice(minPriceParam);
+  const maxPrice = parsePrice(maxPriceParam);
 
   const [category, products] = await Promise.all([
     getCategory(slug),

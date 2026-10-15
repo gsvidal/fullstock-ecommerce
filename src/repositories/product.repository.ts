@@ -34,3 +34,9 @@ export async function findBySlug(slug: string): Promise<Product | null> {
 
   return product ?? null;
 }
+
+export async function findById(id: number): Promise<Product | null> {
+  const [product] = await db.select().from(products).where(eq(products.id, id));
+
+  return product ?? null;
+}

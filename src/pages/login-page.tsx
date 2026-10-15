@@ -9,6 +9,7 @@ import {
   useSubmit,
   type ActionFunctionArgs,
 } from "react-router";
+import { readFormData } from "../lib/read-form-data";
 
 import {
   Button,
@@ -26,8 +27,8 @@ import { commitSession, getSession } from "../lib/session.server";
 import { resolveCartId } from "../services/cart.service";
 
 export async function action({ request }: ActionFunctionArgs) {
+  const formData = await readFormData(request);
   try {
-    const formData = await request.formData();
     const parsed = loginSchema.safeParse(Object.fromEntries(formData));
 
     if (!parsed.success) {

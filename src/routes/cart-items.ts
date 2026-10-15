@@ -12,6 +12,10 @@ import {
   updateCartItemBodySchema,
   removeCartItemBodySchema,
 } from "../schemas/cart-item";
+import { requireCart } from "../guards/cart.guard";
+import { readFormData } from "../lib/read-form-data";
+import { getProductById } from "../services/product.service";
+import * as z from "zod";
 
 const ADD_ERROR = "No pudimos agregar el producto. Intenta de nuevo.";
 const UPDATE_ERROR = "No pudimos actualizar el carrito. Intenta de nuevo.";
@@ -19,10 +23,10 @@ const UPDATE_ERROR = "No pudimos actualizar el carrito. Intenta de nuevo.";
 export function loader() {
   return redirect("/cart");
 }
-import { requireCart } from "../guards/cart.guard";
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
+  const formData = await readFormData(request);
+
   const intent = formData.get("intent");
   const session = await getSession(request);
   const initialCartId = session.get("cartId");
@@ -39,6 +43,13 @@ export async function action({ request }: ActionFunctionArgs) {
         const { productId, quantity } = createCartItemBodySchema.parse(
           Object.fromEntries(formData),
         );
+
+        // obtener el producto por su Id
+        // si no existe, manejar el error apropiadamente (retornar)
+        const product = await getProductById(productId);
+        if (product === null) {
+          return data({ error: ADD_ERROR }, { status: 404 });
+        }
 
         const existingCart =
           initialCartId === undefined ? null : await getCart(initialCartId);
@@ -82,18 +93,22 @@ export async function action({ request }: ActionFunctionArgs) {
       }
 
       default:
-        logError(new Error(`Intent desconocido: ${String(intent)}`));
-
-        return data({ error: UPDATE_ERROR });
+        return data({ error: UPDATE_ERROR }, { status: 400 });
     }
   } catch (error) {
     if (error instanceof Response) throw error;
 
+    const message = intent === "add" ? ADD_ERROR : UPDATE_ERROR;
+
+    if (error instanceof z.ZodError) {
+      return data({ error: message }, { status: 400 });
+    }
+
     logError(error);
 
     return data(
-      { error: intent === "add" ? ADD_ERROR : UPDATE_ERROR },
-      { headers: await sessionHeaders() },
+      { error: message },
+      { headers: await sessionHeaders(), status: 500 },
     );
   }
 }

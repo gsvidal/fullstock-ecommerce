@@ -11,3 +11,7 @@ export async function getProductsByCategory(
 export async function getProduct(slug: string): Promise<Product | null> {
   return productRepository.findBySlug(slug);
 }
+
+export async function getProductById(id: number): Promise<Product | null> {
+  return productRepository.findById(id);
+}

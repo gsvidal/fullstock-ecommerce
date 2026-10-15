@@ -9,6 +9,7 @@ import {
 } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { readFormData } from "../../lib/read-form-data";
 import { useEffect } from "react";
 import {
   Button,
@@ -55,8 +56,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
+  const formData = await readFormData(request);
   try {
-    const formData = await request.formData();
     const parsed = checkoutSchema.safeParse(Object.fromEntries(formData));
 
     if (!parsed.success) {

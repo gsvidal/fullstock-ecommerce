@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { readFormData } from "../lib/read-form-data";
 import {
   Link,
   replace,
@@ -29,8 +30,8 @@ import { resolveCartId } from "../services/cart.service";
 import { logError } from "../lib/log-error";
 
 export async function action({ request }: ActionFunctionArgs) {
+  const formData = await readFormData(request);
   try {
-    const formData = await request.formData();
     const parsed = loginSchema.safeParse(Object.fromEntries(formData));
 
     if (!parsed.success) {
