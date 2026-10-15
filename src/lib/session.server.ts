@@ -3,6 +3,7 @@ import { createSessionStorage, type Session } from "react-router";
 import { db } from "../db/index.ts";
 import { session } from "../db/schema.ts";
 import { and, eq, gte, sql } from "drizzle-orm";
+import { env } from "../env.server.ts";
 
 // Espejo de `src/types/session.d.ts` de la API, que declaraba lo mismo
 // aumentando el módulo de express-session.
@@ -20,6 +21,8 @@ const sessionStorage = createSessionStorage<SessionData>({
     httpOnly: true,
     path: "/",
     maxAge: ONE_WEEK_MS / 1000,
+    secrets: [env.SESSION_SECRET],
+    secure: process.env.NODE_ENV === "production",
   },
 
   async createData(data, expires) {
