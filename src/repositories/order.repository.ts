@@ -1,3 +1,4 @@
+import { and, eq, sql } from "drizzle-orm";
 import { db, type Executor } from "../db/index.ts";
 import { orderItems, orders } from "../db/schema.ts";
 
@@ -6,7 +7,7 @@ export type OrderItem = typeof orderItems.$inferSelect;
 
 export type CreateOrderData = Omit<
   typeof orders.$inferInsert,
-  "id" | "status" | "createdAt" | "updatedAt"
+  "id" | "status" | "mercadopagoOrderId" | "paidAt" | "createdAt" | "updatedAt"
 >;
 
 export async function createOrder(
@@ -45,4 +46,34 @@ export async function findByIdWithItems(
   });
 
   return order ?? null;
+}
+
+export async function setMercadopagoOrderId(
+  id: number,
+  mercadopagoOrderId: string,
+): Promise<void> {
+  await db
+    .update(orders)
+    .set({ mercadopagoOrderId, updatedAt: sql`NOW()` })
+    .where(eq(orders.id, id));
+}
+
+export async function findByMercadopagoOrderId(
+  mercadopagoOrderId: string,
+): Promise<OrderWithItems | null> {
+  const order = await db.query.orders.findFirst({
+    where: { mercadopagoOrderId },
+    with: { items: true },
+  });
+
+  return order ?? null;
+}
+
+export async function markAsPaid(id: number): Promise<boolean> {
+  const result = await db
+    .update(orders)
+    .set({ status: "paid", paidAt: sql`NOW()`, updatedAt: sql`NOW()` })
+    .where(and(eq(orders.id, id), eq(orders.status, "pending")));
+
+  return result.rowCount !== null && result.rowCount > 0;
 }

@@ -110,6 +110,8 @@ export const orders = pgTable(
     phone: text().notNull(),
     total: integer().notNull(),
     status: text().default("pending").notNull(),
+    mercadopagoOrderId: text("mercadopago_order_id").unique(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`now()`)
       .notNull(),
@@ -120,7 +122,10 @@ export const orders = pgTable(
       onDelete: "set null",
     }),
   },
-  (table) => [check("orders_total_check", sql`(${table.total} >= 0)`)],
+  (table) => [
+    check("orders_total_check", sql`(${table.total} >= 0)`),
+    check("orders_status_check", sql`${table.status} IN ('pending', 'paid')`),
+  ],
 );
 
 export const products = pgTable(

@@ -22,6 +22,7 @@ const routes: RouteConfig = [
       route("signup", "./pages/signup-page.tsx"),
     ]),
     route("logout", "./routes/logout.ts"),
+    route("webhooks/mercadopago", "./routes/mercadopago-webhook.ts"),
     route("*", "./pages/not-found-page.tsx"),
   ]),
 ];

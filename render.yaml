@@ -26,6 +26,14 @@ services:
         value: https://98c4de44edbe9fdb8667732dc157aac4@o4512245426618368.ingest.us.sentry.io/4512252024455168
       - key: SENTRY_DSN
         value: https://98c4de44edbe9fdb8667732dc157aac4@o4512245426618368.ingest.us.sentry.io/4512252024455168
+      - key: APP_URL
+        value: https://fullstock-pro-0726.onrender.com
+      # Las credenciales de Mercado Pago no van en el repo: `sync: false` deja
+      # la variable declarada y el valor se carga a mano en el dashboard.
+      - key: MP_ACCESS_TOKEN
+        sync: false
+      - key: MP_WEBHOOK_SECRET
+        sync: false
 
 databases:
   - name: fullstock-pro-0726-db

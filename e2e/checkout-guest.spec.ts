@@ -69,6 +69,16 @@ function orderTotal(page: Page): Locator {
   return page.getByText("Total", { exact: true }).locator("..");
 }
 
+// Confirmar la orden lleva a Mercado Pago (el simulado de los E2E), y pagar
+// ahí vuelve a la confirmación.
+async function confirmAndPay(page: Page): Promise<void> {
+  await page.getByRole("button", { name: "Confirmar Orden" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Mercado Pago (simulado)" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Pagar" }).click();
+}
+
 test("la compra completa: desde el carrito hasta la confirmación de orden", async ({
   page,
 }) => {
@@ -94,7 +104,7 @@ test("la compra completa: desde el carrito hasta la confirmación de orden", asy
 
   // Completar el formulario y confirmar
   await fillShippingForm(page);
-  await page.getByRole("button", { name: "Confirmar Orden" }).click();
+  await confirmAndPay(page);
 
   // Lleva a la confirmación con el mensaje y número de orden
   await expect(page).toHaveURL(/\/order-confirmation\?orderId=\d+/);
@@ -146,7 +156,7 @@ test("compañía es opcional: una compra sin compañía funciona correctamente",
   await page.goto("/checkout");
 
   await fillShippingForm(page, { company: "" });
-  await page.getByRole("button", { name: "Confirmar Orden" }).click();
+  await confirmAndPay(page);
 
   await expect(page).toHaveURL(/\/order-confirmation\?orderId=\d+/);
   await expect(page.getByText("Tu orden está en camino")).toBeVisible();
@@ -158,7 +168,7 @@ test("el carrito después de comprar: contador vacío y /cart sin artículos", a
   await addToCart(page, "taza-sql");
   await page.goto("/checkout");
   await fillShippingForm(page);
-  await page.getByRole("button", { name: "Confirmar Orden" }).click();
+  await confirmAndPay(page);
 
   await expect(page).toHaveURL(/\/order-confirmation\?orderId=\d+/);
   await expect(page.getByText("Tu orden está en camino")).toBeVisible();
@@ -199,7 +209,7 @@ test("la confirmación es privada: quien compró puede recargar pero otra person
   await addToCart(page, "taza-sql");
   await page.goto("/checkout");
   await fillShippingForm(page);
-  await page.getByRole("button", { name: "Confirmar Orden" }).click();
+  await confirmAndPay(page);
 
   await expect(page).toHaveURL(/\/order-confirmation\?orderId=\d+/);
   await expect(page.getByText("Tu orden está en camino")).toBeVisible();
@@ -220,4 +230,23 @@ test("la confirmación es privada: quien compró puede recargar pero otra person
   } finally {
     await otherContext.close();
   }
+});
+
+test("volver sin pagar deja la orden pendiente, y se puede pagar después", async ({
+  page,
+}) => {
+  await addToCart(page, "taza-sql");
+  await page.goto("/checkout");
+  await fillShippingForm(page);
+  await page.getByRole("button", { name: "Confirmar Orden" }).click();
+
+  await page.getByRole("link", { name: "Volver a la tienda" }).click();
+
+  await expect(page).toHaveURL(/\/order-confirmation\?orderId=\d+/);
+  await expect(page.getByText("Falta el pago")).toBeVisible();
+
+  await page.getByRole("button", { name: "Pagar" }).click();
+  await page.getByRole("button", { name: "Pagar" }).click();
+
+  await expect(page.getByText("Tu orden está en camino")).toBeVisible();
 });

@@ -37,6 +37,7 @@ import z from "zod";
 import { logError } from "../../lib/log-error";
 import { pageTitle } from "../../lib/page-meta";
 import { getCartFromSession } from "../../lib/session-utils";
+import { startPayment } from "../../services/payments.service";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request);
@@ -91,9 +92,15 @@ export async function action({ request }: ActionFunctionArgs) {
     session.unset("cartId");
     session.set("lastOrderId", order.id);
 
-    return redirect(`/order-confirmation?orderId=${order.id}`, {
-      headers: { "Set-Cookie": await commitSession(session) },
-    });
+    const headers = { "Set-Cookie": await commitSession(session) };
+
+    try {
+      const checkoutUrl = await startPayment(order.id);
+      return redirect(checkoutUrl, { headers });
+    } catch (error) {
+      logError(error);
+      return redirect(`/order-confirmation?orderId=${order.id}`, { headers });
+    }
   } catch (error) {
     logError(error);
     return { root: "No pudimos procesar tu orden. Intenta de nuevo." };

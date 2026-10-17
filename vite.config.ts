@@ -25,7 +25,14 @@ export default defineConfig({
           include: ["src/**/*.db.test.ts"],
           globalSetup: ["./src/vitest.global-setup.ts"],
           env: process.env.VITEST
-            ? { DATABASE_URL: testDatabaseUrl("test"), SESSION_SECRET: "test" }
+            ? {
+                DATABASE_URL: testDatabaseUrl("test"),
+                SESSION_SECRET: "test",
+                APP_URL: "http://localhost:5173",
+                MP_ACCESS_TOKEN: "test",
+                MP_WEBHOOK_SECRET: "test",
+                MP_API_URL: "http://mercadopago.invalid",
+              }
             : undefined,
         },
       },
