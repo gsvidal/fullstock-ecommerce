@@ -16,6 +16,7 @@ import RouteErrorBoundary from "./components/route-error-boundary";
 import "./styles/index.css";
 import { getSession, commitSession } from "./lib/session.server";
 import { getCartFromSession, getUserFromSession } from "./lib/session-utils";
+import ChatWidget from "./components/chat-widget";
 
 // Aplica el tema antes de que React monte, para evitar el parpadeo (FOUC).
 // Venía del `<script>` inline de `index.html`, que ya no existe.
@@ -106,6 +107,7 @@ export default function Root() {
         <Outlet />
       </main>
       <Footer className="border-t border-t-border" />
+      <ChatWidget />
     </div>
   );
 }

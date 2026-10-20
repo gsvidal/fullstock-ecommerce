@@ -23,6 +23,7 @@ const routes: RouteConfig = [
     ]),
     route("logout", "./routes/logout.ts"),
     route("webhooks/mercadopago", "./routes/mercadopago-webhook.ts"),
+    route("chat", "./routes/chat.ts"),
     route("*", "./pages/not-found-page.tsx"),
   ]),
 ];
