@@ -32,6 +32,7 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
       <Container className="flex flex-col gap-8 md:flex-row md:items-start">
         <div className="max-w-xl min-w-[min(100%,28rem)] grow basis-0 self-center rounded-xl bg-muted-background md:min-w-fit md:self-start">
           <img
+            data-testid="product-name"
             src={product.imgSrc}
             alt={product.title}
             className="aspect-square w-full object-contain"
@@ -40,7 +41,10 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
         <div className="grow basis-0">
           <h1 className="mb-3 text-3xl font-bold">{product.title}</h1>
           <p className="mb-6 text-3xl">{formatPrice(product.price)}</p>
-          <p className="mb-10 text-sm text-muted-foreground">
+          <p
+            className="mb-10 text-sm text-muted-foreground"
+            data-testid="product-description"
+          >
             {product.description}
           </p>
           <fetcher.Form method="POST" action="/cart/items">
@@ -65,7 +69,10 @@ export default function ProductPage({ loaderData }: Route.ComponentProps) {
             <h2 className="mb-6 text-sm font-semibold text-accent-foreground">
               Características
             </h2>
-            <ul className="list-disc pl-4 text-sm text-muted-foreground">
+            <ul
+              className="list-disc pl-4 text-sm text-muted-foreground"
+              data-testid="product-features"
+            >
               {product.features.map((feature) => (
                 <li key={feature}>{feature}</li>
               ))}
