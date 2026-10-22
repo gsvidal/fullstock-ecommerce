@@ -35,6 +35,7 @@ export default defineConfig({
         MP_ACCESS_TOKEN: "e2e",
         MP_WEBHOOK_SECRET: "e2e",
         MP_API_URL: `http://localhost:${MERCADOPAGO_PORT}`,
+        GEMINI_API_KEY: "test",
       },
     },
   ],

@@ -45,6 +45,7 @@ jobs:
       MP_ACCESS_TOKEN: "test"
       MP_WEBHOOK_SECRET: "test"
       MP_API_URL: "http://mercadopago.invalid"
+      GEMINI_API_KEY: "test"
 
     steps:
       - uses: actions/checkout@v7
