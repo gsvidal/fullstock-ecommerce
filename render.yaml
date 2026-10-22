@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: fullstock-pro-0726
+    name: fullstock-ecommerce
     runtime: node
     # Sin `plan`, Render elige uno pago.
     plan: free
@@ -17,7 +17,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: fullstock-pro-0726-db
+          name: fullstock-ecommerce-db
           property: connectionString
       # Render lo genera una vez, al crear el servicio, y nadie lo ve.
       - key: SESSION_SECRET
@@ -27,16 +27,18 @@ services:
       - key: SENTRY_DSN
         value: https://98c4de44edbe9fdb8667732dc157aac4@o4512245426618368.ingest.us.sentry.io/4512252024455168
       - key: APP_URL
-        value: https://fullstock-pro-0726.onrender.com
+        value: https://fullstock-ecommerce.onrender.com
       # Las credenciales de Mercado Pago no van en el repo: `sync: false` deja
       # la variable declarada y el valor se carga a mano en el dashboard.
       - key: MP_ACCESS_TOKEN
         sync: false
       - key: MP_WEBHOOK_SECRET
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false
 
 databases:
-  - name: fullstock-pro-0726-db
+  - name: fullstock-ecommerce-db
     plan: free
     region: virginia
     # La misma versión que el CI (`postgres:16`) y que la base de desarrollo.
