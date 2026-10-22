@@ -8,6 +8,7 @@ const envSchema = z.object({
   MP_ACCESS_TOKEN: z.string().min(1),
   MP_WEBHOOK_SECRET: z.string().min(1),
   MP_API_URL: z.url().default("https://api.mercadopago.com"),
+  GEMINI_API_KEY: z.string().min(1),
 });
 
 const parsed = envSchema.safeParse(process.env);

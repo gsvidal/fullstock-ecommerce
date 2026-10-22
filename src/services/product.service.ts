@@ -15,3 +15,15 @@ export async function getProduct(slug: string): Promise<Product | null> {
 export async function getProductById(id: number): Promise<Product | null> {
   return productRepository.findById(id);
 }
+
+export async function searchProducts(filters: {
+  query?: string;
+  categorySlug?: string;
+  maxPrice?: number;
+}): Promise<(Product & { categorySlug: string })[]> {
+  return productRepository.search(filters);
+}
+
+export async function getProductsBySlugs(slugs: string[]): Promise<Product[]> {
+  return productRepository.findBySlugs(slugs);
+}
